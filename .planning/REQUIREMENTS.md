@@ -38,6 +38,13 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **CURE-05**: End-of-day final consolidation pass produces polished summary for the complete day
 - [ ] **CURE-06**: Curated items auto-link to existing vault notes via [[wikilinks]] when topics match
 
+### Storage
+
+- [ ] **STOR-01**: Local SQLite database serves as processing layer — source of truth for all captured data
+- [ ] **STOR-02**: Database tracks processing status per URL (captured → content fetched → curated → written to vault)
+- [ ] **STOR-03**: Database deduplicates URLs visited multiple times (one entry per unique URL per day)
+- [ ] **STOR-04**: Daily notes can be regenerated from the database if vault files are corrupted or deleted
+
 ### Infrastructure
 
 - [ ] **INFR-01**: LLM provider is swappable between Claude API (default) and local Ollama
@@ -96,38 +103,42 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CAPT-01 | — | Pending |
-| CAPT-02 | — | Pending |
-| CAPT-03 | — | Pending |
-| CAPT-04 | — | Pending |
-| CAPT-05 | — | Pending |
-| NOTE-01 | — | Pending |
-| NOTE-02 | — | Pending |
-| NOTE-03 | — | Pending |
-| NOTE-04 | — | Pending |
-| PROC-01 | — | Pending |
-| PROC-02 | — | Pending |
-| PROC-03 | — | Pending |
-| PROC-04 | — | Pending |
-| CURE-01 | — | Pending |
-| CURE-02 | — | Pending |
-| CURE-03 | — | Pending |
-| CURE-04 | — | Pending |
-| CURE-05 | — | Pending |
-| CURE-06 | — | Pending |
-| INFR-01 | — | Pending |
-| INFR-02 | — | Pending |
-| INFR-03 | — | Pending |
-| DELV-01 | — | Pending |
-| DELV-02 | — | Pending |
-| CONV-01 | — | Pending |
-| CONV-02 | — | Pending |
+| CAPT-01 | Phase 1 | Pending |
+| CAPT-02 | Phase 1 | Pending |
+| CAPT-03 | Phase 1 | Pending |
+| CAPT-04 | Phase 1 | Pending |
+| CAPT-05 | Phase 1 | Pending |
+| NOTE-01 | Phase 3 | Pending |
+| NOTE-02 | Phase 3 | Pending |
+| NOTE-03 | Phase 3 | Pending |
+| NOTE-04 | Phase 2 | Pending |
+| PROC-01 | Phase 4 | Pending |
+| PROC-02 | Phase 4 | Pending |
+| PROC-03 | Phase 4 | Pending |
+| PROC-04 | Phase 4 | Pending |
+| CURE-01 | Phase 5 | Pending |
+| CURE-02 | Phase 5 | Pending |
+| CURE-03 | Phase 5 | Pending |
+| CURE-04 | Phase 5 | Pending |
+| CURE-05 | Phase 5 | Pending |
+| CURE-06 | Phase 5 | Pending |
+| STOR-01 | Phase 2 | Pending |
+| STOR-02 | Phase 2 | Pending |
+| STOR-03 | Phase 2 | Pending |
+| STOR-04 | Phase 3 | Pending |
+| INFR-01 | Phase 5 | Pending |
+| INFR-02 | Phase 6 | Pending |
+| INFR-03 | Phase 6 | Pending |
+| DELV-01 | Phase 7 | Pending |
+| DELV-02 | Phase 7 | Pending |
+| CONV-01 | Phase 7 | Pending |
+| CONV-02 | Phase 7 | Pending |
 
 **Coverage:**
-- v1 requirements: 26 total
-- Mapped to phases: 0
-- Unmapped: 26 ⚠️
+- v1 requirements: 30 total
+- Mapped to phases: 30
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-09*
-*Last updated: 2026-04-09 after initial definition*
+*Last updated: 2026-04-09 after roadmap creation*

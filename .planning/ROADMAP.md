@@ -33,7 +33,7 @@ Plans:
 - [x] 01-01-PLAN.md — Scaffold WXT project with dependencies, build config, and placeholder entrypoints
 - [x] 01-02-PLAN.md — Define type contracts, storage/blocklist modules, default blocklist, and test scaffolds
 - [x] 01-03-PLAN.md — Implement core capture engine (service worker, dwell tracking, blocklist filtering)
-- [ ] 01-04-PLAN.md — Implement popup UI (status dashboard, pause toggle, quick-block button)
+- [x] 01-04-PLAN.md — Implement popup UI (status dashboard, pause toggle, quick-block button)
 - [ ] 01-05-PLAN.md — Implement history backfill, wire into startup, verify Chrome and Comet browsers
 
 ### Phase 2: Data Export Pipeline
@@ -116,7 +116,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Browser Extension Foundation | 3/5 | In Progress|  |
+| 1. Browser Extension Foundation | 4/5 | In Progress|  |
 | 2. Data Export Pipeline | 0/? | Not started | - |
 | 3. Daily Note Generation | 0/? | Not started | - |
 | 4. Content Processing | 0/? | Not started | - |

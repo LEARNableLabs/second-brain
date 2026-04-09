@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-04-09T20:48:27Z"
+last_updated: "2026-04-09T20:54:41.479Z"
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 5
-  completed_plans: 3
-  percent: 60
+  completed_plans: 4
+  percent: 80
 ---
 
 # Project State: Second Brain
@@ -25,11 +25,11 @@ progress:
 ## Current Position
 
 **Phase:** 1 (Browser Extension Foundation) — EXECUTING
-**Plan:** 3 of 5 (completed)
+**Plan:** 4 of 5 (completed)
 **Task:** N/A
-**Status:** Plan 01-03 complete, ready for 01-04
+**Status:** Ready to execute
 
-**Progress:** [██████░░░░] 60%
+**Progress:** [████████░░] 80%
 
 ## Performance Metrics
 
@@ -68,6 +68,9 @@ progress:
 - [Phase 01-03]: D-13 implemented as focused-tab-only tracking (handleTabActivated catches background tabs on focus)
 - [Phase 01-03]: setTimeout acceptable for 5s delays (~5% failure rate; chrome.alarms has 1-minute minimum)
 - [Phase 01-03]: Blocklist re-checked at capture time (not just startTracking) to prevent capture of newly-blocked URLs during dwell period
+- [Phase 01]: D-01 Status dashboard implemented with toggle, stats, and quick-block per UI-SPEC
+- [Phase 01]: D-02 Temporary pause toggle persists to chrome.storage, resumes on toggle back
+- [Phase 01]: D-03 Quick-block button adds domain to blocklist with 3s toast confirmation
 
 ### Todos (Pending)
 
@@ -115,6 +118,7 @@ From research SUMMARY.md:
 **Context for next session:** Core capture engine complete with dwell tracker and background service worker. 48 tests passing. Extension builds successfully. Ready for popup UI implementation.
 
 **Completed this session:**
+
 - Plan 01-03: Dwell tracker + background service worker (2 tasks, 21 tests, 371s)
 - Commits: 0f461a0 (dwell-tracker), 5fa9ed8 (background service worker)
 

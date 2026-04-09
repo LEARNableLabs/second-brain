@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-04-09T20:33:07.703Z"
+last_updated: "2026-04-09T20:40:31.257Z"
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 5
-  completed_plans: 1
-  percent: 20
+  completed_plans: 2
+  percent: 40
 ---
 
 # Project State: Second Brain
@@ -31,7 +31,7 @@ Plan: 1 of 5
 **Task:** N/A
 **Status:** Executing Phase 1
 
-**Progress:** [██░░░░░░░░] 20%
+**Progress:** [████░░░░░░] 40%
 
 ## Performance Metrics
 
@@ -64,6 +64,9 @@ Plan: 1 of 5
 - **Phase structure derived from dependencies**: Extension foundation → Export pipeline → Daily notes → Content processing → AI curation → Automation → Delivery
 - [Phase 01]: WXT auto-imports used for defineBackground (no manual imports needed)
 - [Phase 01]: Minimal permissions set: tabs, history, webNavigation, storage only - no host_permissions or <all_urls>
+- [Phase 01-02]: Use Zod for runtime validation of chrome.storage data (mitigates T-01-02, T-01-03)
+- [Phase 01-02]: D-07 subdomain matching implemented via exact match + .endsWith('.domain') pattern
+- [Phase 01-02]: Test setup mocks chrome/browser globals to enable webextension-polyfill in jsdom environment
 
 ### Todos (Pending)
 

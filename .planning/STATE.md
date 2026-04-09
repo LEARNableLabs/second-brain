@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-04-09T20:40:31.257Z"
+last_updated: "2026-04-09T20:48:27Z"
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 5
-  completed_plans: 2
-  percent: 40
+  completed_plans: 3
+  percent: 60
 ---
 
 # Project State: Second Brain
@@ -24,22 +24,20 @@ progress:
 
 ## Current Position
 
-Phase: 1 (Browser Extension Foundation) — EXECUTING
-Plan: 1 of 5
-**Phase:** Phase 1 — Browser Extension Foundation (context gathered)
-**Plan:** N/A
+**Phase:** 1 (Browser Extension Foundation) — EXECUTING
+**Plan:** 3 of 5 (completed)
 **Task:** N/A
-**Status:** Executing Phase 1
+**Status:** Plan 01-03 complete, ready for 01-04
 
-**Progress:** [████░░░░░░] 40%
+**Progress:** [██████░░░░] 60%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Plans completed: 0
-- Tasks completed: 0
-- Average tasks per plan: N/A
+- Plans completed: 3
+- Tasks completed: 6
+- Average tasks per plan: 2.0
 
 **Quality:**
 
@@ -67,6 +65,9 @@ Plan: 1 of 5
 - [Phase 01-02]: Use Zod for runtime validation of chrome.storage data (mitigates T-01-02, T-01-03)
 - [Phase 01-02]: D-07 subdomain matching implemented via exact match + .endsWith('.domain') pattern
 - [Phase 01-02]: Test setup mocks chrome/browser globals to enable webextension-polyfill in jsdom environment
+- [Phase 01-03]: D-13 implemented as focused-tab-only tracking (handleTabActivated catches background tabs on focus)
+- [Phase 01-03]: setTimeout acceptable for 5s delays (~5% failure rate; chrome.alarms has 1-minute minimum)
+- [Phase 01-03]: Blocklist re-checked at capture time (not just startTracking) to prevent capture of newly-blocked URLs during dwell period
 
 ### Todos (Pending)
 
@@ -109,16 +110,20 @@ From research SUMMARY.md:
 
 ## Session Continuity
 
-**Last completed:** Phase 1 context gathered (2026-04-09)
-**Next action:** `/gsd-plan-phase 1` to decompose Phase 1 into executable plans
-**Context for next session:** Phase 1 context captured with 14 decisions covering popup UI, capture behavior (5s dwell), blocklist defaults (4 categories), and history auto-backfill. GitHub issues #1-#5 created.
+**Last completed:** Plan 01-03 (Capture Engine) — 2026-04-09
+**Next action:** Execute Plan 01-04 (Popup UI) via `/gsd-execute-phase 1`
+**Context for next session:** Core capture engine complete with dwell tracker and background service worker. 48 tests passing. Extension builds successfully. Ready for popup UI implementation.
 
-**Files to review before planning:**
+**Completed this session:**
+- Plan 01-03: Dwell tracker + background service worker (2 tasks, 21 tests, 371s)
+- Commits: 0f461a0 (dwell-tracker), 5fa9ed8 (background service worker)
 
-- `.planning/phases/01-browser-extension-foundation/01-CONTEXT.md` — All user decisions for Phase 1
-- `.planning/research/STACK.md` — WXT framework details, dependency list
-- `.planning/research/PITFALLS.md` — Service worker context confusion, Chrome Web Store rejection prevention
-- `.planning/research/ARCHITECTURE.md` — Extension architecture patterns
+**Files to review before Plan 01-04:**
+
+- `.planning/phases/01-browser-extension-foundation/01-04-PLAN.md` — Popup UI plan
+- `.planning/phases/01-browser-extension-foundation/01-03-SUMMARY.md` — Capture engine implementation details
+- `extension/components/dwell-tracker.ts` — Dwell tracking implementation
+- `extension/entrypoints/background.ts` — Service worker event handlers
 
 ---
 *State initialized: 2026-04-09*

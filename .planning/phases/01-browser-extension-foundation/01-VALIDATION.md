@@ -1,8 +1,8 @@
 ---
 phase: 1
 slug: browser-extension-foundation
-status: draft
-nyquist_compliant: false
+status: approved
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-04-09
 ---
@@ -18,17 +18,17 @@ created: 2026-04-09
 | Property | Value |
 |----------|-------|
 | **Framework** | vitest 4.x |
-| **Config file** | none — Wave 0 installs |
-| **Quick run command** | `npx vitest run --reporter=verbose` |
-| **Full suite command** | `npx vitest run` |
+| **Config file** | extension/vitest.config.ts (created in Plan 01-01) |
+| **Quick run command** | `cd extension && npx vitest run --reporter=verbose` |
+| **Full suite command** | `cd extension && npx vitest run` |
 | **Estimated runtime** | ~5 seconds |
 
 ---
 
 ## Sampling Rate
 
-- **After every task commit:** Run `npx vitest run --reporter=verbose`
-- **After every plan wave:** Run `npx vitest run`
+- **After every task commit:** Run `cd extension && npx vitest run --reporter=verbose`
+- **After every plan wave:** Run `cd extension && npx vitest run`
 - **Before `/gsd-verify-work`:** Full suite must be green
 - **Max feedback latency:** 10 seconds
 
@@ -38,11 +38,13 @@ created: 2026-04-09
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| TBD | TBD | TBD | CAPT-01 | — | N/A | integration | `npx vitest run` | ❌ W0 | ⬜ pending |
-| TBD | TBD | TBD | CAPT-02 | — | N/A | integration | `npx vitest run` | ❌ W0 | ⬜ pending |
-| TBD | TBD | TBD | CAPT-03 | — | N/A | integration | `npx vitest run` | ❌ W0 | ⬜ pending |
-| TBD | TBD | TBD | CAPT-04 | — | N/A | unit | `npx vitest run` | ❌ W0 | ⬜ pending |
-| TBD | TBD | TBD | CAPT-05 | — | N/A | unit | `npx vitest run` | ❌ W0 | ⬜ pending |
+| 01-01-T1 | 01-01 | 1 | CAPT-01 | — | N/A | build | `cd extension && npx wxt build` | ❌ W0 | ⬜ pending |
+| 01-02-T1 | 01-02 | 2 | CAPT-04 | — | Blocklist filters domains | unit | `cd extension && npx vitest run blocklist` | ❌ W0 | ⬜ pending |
+| 01-02-T2 | 01-02 | 2 | CAPT-05 | — | N/A | unit | `cd extension && npx vitest run storage` | ❌ W0 | ⬜ pending |
+| 01-03-T1 | 01-03 | 3 | CAPT-01 | — | Dwell threshold filters bounces | unit | `cd extension && npx vitest run dwell` | ❌ W0 | ⬜ pending |
+| 01-04-T1 | 01-04 | 3 | CAPT-05 | — | N/A | unit | `cd extension && npx vitest run popup` | ❌ W0 | ⬜ pending |
+| 01-05-T1 | 01-05 | 4 | CAPT-03 | — | N/A | unit | `cd extension && npx vitest run history` | ❌ W0 | ⬜ pending |
+| 01-05-T3 | 01-05 | 4 | CAPT-02 | — | N/A | manual | Load in Comet browser | N/A | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -50,11 +52,12 @@ created: 2026-04-09
 
 ## Wave 0 Requirements
 
-- [ ] `vitest` — install test framework
-- [ ] `vitest.config.ts` — configure for TypeScript + WXT
-- [ ] `tests/blocklist.test.ts` — stubs for CAPT-04, CAPT-05
-- [ ] `tests/capture.test.ts` — stubs for CAPT-01, CAPT-02
-- [ ] `tests/history-fallback.test.ts` — stubs for CAPT-03
+- [ ] `vitest` — installed via Plan 01-01 (package.json)
+- [ ] `vitest.config.ts` — created in Plan 01-01
+- [ ] `tests/blocklist.test.ts` — stubs for CAPT-04, CAPT-05 (Plan 01-02)
+- [ ] `tests/storage.test.ts` — stubs for CAPT-01 storage (Plan 01-02)
+- [ ] `tests/dwell-tracker.test.ts` — stubs for CAPT-01 dwell (Plan 01-02)
+- [ ] `tests/history-backfill.test.ts` — stubs for CAPT-03 (Plan 01-02)
 
 ---
 
@@ -70,11 +73,11 @@ created: 2026-04-09
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 10s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency < 10s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** approved 2026-04-09

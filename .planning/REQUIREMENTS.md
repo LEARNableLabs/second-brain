@@ -44,6 +44,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **STOR-02**: Database tracks processing status per URL (captured → content fetched → curated → written to vault)
 - [ ] **STOR-03**: Database deduplicates URLs visited multiple times (one entry per unique URL per day)
 - [ ] **STOR-04**: Daily notes can be regenerated from the database if vault files are corrupted or deleted
+- [ ] **STOR-05**: Output location is configurable — user chooses between inside Obsidian vault (default) or standalone folder
+- [ ] **STOR-06**: Output folder is git-tracked — each processing cycle auto-commits the final .md files (only markdown, no DB or temp files)
 
 ### Infrastructure
 
@@ -126,6 +128,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STOR-02 | Phase 2 | Pending |
 | STOR-03 | Phase 2 | Pending |
 | STOR-04 | Phase 3 | Pending |
+| STOR-05 | Phase 3 | Pending |
+| STOR-06 | Phase 3 | Pending |
 | INFR-01 | Phase 5 | Pending |
 | INFR-02 | Phase 6 | Pending |
 | INFR-03 | Phase 6 | Pending |
@@ -135,8 +139,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CONV-02 | Phase 7 | Pending |
 
 **Coverage:**
-- v1 requirements: 30 total
-- Mapped to phases: 30
+- v1 requirements: 32 total
+- Mapped to phases: 32
 - Unmapped: 0 ✓
 
 ---

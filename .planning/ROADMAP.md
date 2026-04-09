@@ -46,7 +46,7 @@
 ### Phase 3: Daily Note Generation
 **Goal**: Users can see their browsing activity organized as daily Obsidian-compatible markdown files
 **Depends on**: Phase 2
-**Requirements**: NOTE-01, NOTE-02, NOTE-03, STOR-04
+**Requirements**: NOTE-01, NOTE-02, NOTE-03, STOR-04, STOR-05, STOR-06
 **Success Criteria** (what must be TRUE):
   1. User opens Obsidian and sees a new markdown file for today's date in the vault
   2. Daily note contains a chronological timeline of visited URLs with timestamps at the bottom
@@ -54,6 +54,8 @@
   4. Daily note uses valid Obsidian markdown with proper YAML frontmatter and can be opened without errors
   5. User can open Obsidian while processing runs and the file is not corrupted (atomic writes work)
   6. User can regenerate a daily note from the database if the vault file is corrupted or deleted
+  7. User can configure output to go inside an Obsidian vault (default) or to a standalone folder
+  8. Each processing cycle auto-commits the final .md files to git in the output folder (only markdown tracked, no DB or temp files)
 **Plans**: TBD
 **UI hint**: yes
 

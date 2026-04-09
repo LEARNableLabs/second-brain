@@ -1,0 +1,35 @@
+{
+  "google": [
+    "google.com",
+    "gmail.com",
+    "drive.google.com",
+    "docs.google.com",
+    "calendar.google.com",
+    "maps.google.com"
+  ],
+  "banking": [
+    "bankofamerica.com",
+    "chase.com",
+    "wellsfargo.com",
+    "citibank.com",
+    "paypal.com",
+    "venmo.com"
+  ],
+  "social": [
+    "twitter.com",
+    "x.com",
+    "reddit.com",
+    "facebook.com",
+    "instagram.com",
+    "linkedin.com",
+    "youtube.com"
+  ],
+  "auth": [
+    "localhost",
+    "login.microsoftonline.com",
+    "accounts.google.com",
+    "auth0.com",
+    "okta.com"
+  ],
+  "custom": []
+}

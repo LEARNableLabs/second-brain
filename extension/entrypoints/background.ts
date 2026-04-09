@@ -1,6 +1,7 @@
 import browser from 'webextension-polyfill';
 import { startTracking, cancelTracking } from '../components/dwell-tracker';
 import { loadBlocklist, isBlocked, loadDefaultBlocklist, flattenBlocklist } from '../components/blocklist';
+import { detectGap, backfillHistory } from '../components/history-backfill';
 
 /**
  * Background Service Worker - Event-Driven Capture Engine
@@ -120,6 +121,7 @@ export async function handleTabRemoved(
 /**
  * Handle extension install event (runtime.onInstalled)
  * Initialize default blocklist on first install
+ * Backfill history on extension update
  */
 export async function handleInstall(
   details: chrome.runtime.InstalledDetails
@@ -135,6 +137,14 @@ export async function handleInstall(
 
       console.log('Second Brain Capture: Default blocklist initialized');
     }
+
+    if (details.reason === 'update') {
+      // Backfill any gaps from when extension was disabled/updating
+      const gapStart = await detectGap();
+      if (gapStart !== null) {
+        await backfillHistory(gapStart);
+      }
+    }
   } catch (error) {
     console.error('Error in handleInstall:', error);
   }
@@ -143,12 +153,20 @@ export async function handleInstall(
 /**
  * Handle browser startup event (runtime.onStartup)
  * D-02: Reset isPaused to false (pause is temporary)
+ * D-11: Auto-detect gaps and backfill from history on startup
  */
 export async function handleStartup(): Promise<void> {
   try {
     // Reset pause state on browser startup
     await browser.storage.local.set({ isPaused: false });
     console.log('Second Brain Capture: Service worker started, pause state reset');
+
+    // D-11: Auto-detect gaps and backfill from history on startup
+    const gapStart = await detectGap();
+    if (gapStart !== null) {
+      const count = await backfillHistory(gapStart);
+      console.log(`Second Brain Capture: backfilled ${count} entries from gap starting at ${new Date(gapStart).toISOString()}`);
+    }
   } catch (error) {
     console.error('Error in handleStartup:', error);
   }

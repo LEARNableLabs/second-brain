@@ -14,6 +14,11 @@ const mockBlocklist = {
   }),
 };
 
+const mockHistoryBackfill = {
+  detectGap: vi.fn(async () => null),
+  backfillHistory: vi.fn(async () => 0),
+};
+
 const mockStorage: Record<string, any> = {};
 const mockStorageAPI = {
   get: vi.fn(async (keys?: string | string[]) => {
@@ -59,6 +64,7 @@ const mockStorageAPI = {
 // Mock modules
 vi.mock('../components/dwell-tracker', () => mockDwellTracker);
 vi.mock('../components/blocklist', () => mockBlocklist);
+vi.mock('../components/history-backfill', () => mockHistoryBackfill);
 
 // Import the handlers (they should be exported from background.ts)
 let handlePageLoad: (details: WebNavigation.OnCompletedDetailsType) => Promise<void>;
@@ -315,6 +321,81 @@ describe('background service worker', () => {
       await mockStorageAPI.set({ isPaused: false });
 
       expect(mockStorage.isPaused).toBe(false);
+    });
+
+    it('calls detectGap on startup', async () => {
+      mockHistoryBackfill.detectGap.mockResolvedValue(null);
+
+      // Simulate handleStartup
+      await mockStorageAPI.set({ isPaused: false });
+      await mockHistoryBackfill.detectGap();
+
+      expect(mockHistoryBackfill.detectGap).toHaveBeenCalled();
+    });
+
+    it('calls backfillHistory when gap is detected', async () => {
+      const gapTimestamp = Date.now() - (60 * 60 * 1000); // 1 hour ago
+      mockHistoryBackfill.detectGap.mockResolvedValue(gapTimestamp);
+      mockHistoryBackfill.backfillHistory.mockResolvedValue(5);
+
+      // Simulate handleStartup
+      await mockStorageAPI.set({ isPaused: false });
+      const gapStart = await mockHistoryBackfill.detectGap();
+      if (gapStart !== null) {
+        await mockHistoryBackfill.backfillHistory(gapStart);
+      }
+
+      expect(mockHistoryBackfill.backfillHistory).toHaveBeenCalledWith(gapTimestamp);
+    });
+
+    it('does NOT call backfillHistory when no gap is detected', async () => {
+      mockHistoryBackfill.detectGap.mockResolvedValue(null);
+
+      // Simulate handleStartup
+      await mockStorageAPI.set({ isPaused: false });
+      const gapStart = await mockHistoryBackfill.detectGap();
+      if (gapStart !== null) {
+        await mockHistoryBackfill.backfillHistory(gapStart);
+      }
+
+      expect(mockHistoryBackfill.backfillHistory).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('handleInstall on update', () => {
+    it('calls detectGap when extension is updated', async () => {
+      const details: Runtime.OnInstalledDetailsType = {
+        reason: 'update' as chrome.runtime.OnInstalledReason,
+      };
+
+      mockHistoryBackfill.detectGap.mockResolvedValue(null);
+
+      // Simulate handleInstall with reason='update'
+      if (details.reason === 'update') {
+        await mockHistoryBackfill.detectGap();
+      }
+
+      expect(mockHistoryBackfill.detectGap).toHaveBeenCalled();
+    });
+
+    it('calls backfillHistory when gap is detected on update', async () => {
+      const details: Runtime.OnInstalledDetailsType = {
+        reason: 'update' as chrome.runtime.OnInstalledReason,
+      };
+
+      const gapTimestamp = Date.now() - (30 * 60 * 1000); // 30 minutes ago
+      mockHistoryBackfill.detectGap.mockResolvedValue(gapTimestamp);
+      mockHistoryBackfill.backfillHistory.mockResolvedValue(3);
+
+      // Simulate handleInstall with reason='update'
+      if (details.reason === 'update') {
+        const gapStart = await mockHistoryBackfill.detectGap();
+        if (gapStart !== null) {
+          await mockHistoryBackfill.backfillHistory(gapStart);
+        }
+      }
+
+      expect(mockHistoryBackfill.backfillHistory).toHaveBeenCalledWith(gapTimestamp);
     });
   });
 });

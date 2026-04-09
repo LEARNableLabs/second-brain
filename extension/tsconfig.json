@@ -16,7 +16,8 @@
     "components/**/*",
     "tests/**/*",
     "wxt.config.ts",
-    "vitest.config.ts"
+    "vitest.config.ts",
+    ".wxt/types/**/*"
   ],
-  "exclude": ["node_modules", ".output", ".wxt", "dist"]
+  "exclude": ["node_modules", ".output", "dist"]
 }

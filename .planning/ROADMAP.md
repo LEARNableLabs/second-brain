@@ -27,8 +27,13 @@
   3. User can view captured browsing data even when the extension wasn't running (fallback to history export)
   4. User browses Gmail, Google Search, or social media and these sites are NOT captured (smart blocklist works)
   5. User can edit a config file to add domains to blocklist or remove domains from blocklist
-**Plans**: TBD
-**UI hint**: yes
+**Plans**: 4 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Scaffold WXT project, define type contracts, create test infrastructure and default blocklist
+- [ ] 01-02-PLAN.md — Implement core capture engine (service worker, dwell tracking, blocklist filtering)
+- [ ] 01-03-PLAN.md — Implement popup UI (status dashboard, pause toggle, quick-block button)
+- [ ] 01-04-PLAN.md — Implement history backfill, wire into startup, verify Chrome and Comet browsers
 
 ### Phase 2: Data Export Pipeline
 **Goal**: Captured browsing data can be extracted from extension storage into a format suitable for batch processing
@@ -110,7 +115,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Browser Extension Foundation | 0/? | Not started | - |
+| 1. Browser Extension Foundation | 0/4 | Planning complete | - |
 | 2. Data Export Pipeline | 0/? | Not started | - |
 | 3. Daily Note Generation | 0/? | Not started | - |
 | 4. Content Processing | 0/? | Not started | - |

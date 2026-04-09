@@ -30,7 +30,7 @@
 **Plans**: 5 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Scaffold WXT project with dependencies, build config, and placeholder entrypoints
+- [x] 01-01-PLAN.md — Scaffold WXT project with dependencies, build config, and placeholder entrypoints
 - [ ] 01-02-PLAN.md — Define type contracts, storage/blocklist modules, default blocklist, and test scaffolds
 - [ ] 01-03-PLAN.md — Implement core capture engine (service worker, dwell tracking, blocklist filtering)
 - [ ] 01-04-PLAN.md — Implement popup UI (status dashboard, pause toggle, quick-block button)

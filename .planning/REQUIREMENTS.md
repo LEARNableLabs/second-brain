@@ -9,7 +9,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Capture
 
-- [ ] **CAPT-01**: Browser extension passively captures URL, title, domain, and timestamp from Chrome
+- [x] **CAPT-01**: Browser extension passively captures URL, title, domain, and timestamp from Chrome
 - [ ] **CAPT-02**: Browser extension passively captures URL, title, domain, and timestamp from Comet browser
 - [ ] **CAPT-03**: Browser history export pulls browsing data as fallback when extension isn't running
 - [ ] **CAPT-04**: Smart default blocklist filters Gmail, Google Search, banking, and social media domains
@@ -105,7 +105,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CAPT-01 | Phase 1 | Pending |
+| CAPT-01 | Phase 1 | Complete |
 | CAPT-02 | Phase 1 | Pending |
 | CAPT-03 | Phase 1 | Pending |
 | CAPT-04 | Phase 1 | Pending |

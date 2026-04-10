@@ -7,7 +7,7 @@
 
 ## Phases
 
-- [ ] **Phase 1: Browser Extension Foundation** - Passive capture of URLs, titles, and metadata from Chrome and Comet
+- [x] **Phase 1: Browser Extension Foundation** - Passive capture of URLs, titles, and metadata from Chrome and Comet (completed 2026-04-10)
 - [ ] **Phase 2: Data Export Pipeline** - Bridge extension storage to processing layer with versioned schema
 - [ ] **Phase 3: Daily Note Generation** - Create Obsidian-compatible markdown files with chronological timeline
 - [ ] **Phase 4: Content Processing** - Fetch and process full page content for AI analysis
@@ -34,7 +34,7 @@ Plans:
 - [x] 01-02-PLAN.md — Define type contracts, storage/blocklist modules, default blocklist, and test scaffolds
 - [x] 01-03-PLAN.md — Implement core capture engine (service worker, dwell tracking, blocklist filtering)
 - [x] 01-04-PLAN.md — Implement popup UI (status dashboard, pause toggle, quick-block button)
-- [ ] 01-05-PLAN.md — Implement history backfill, wire into startup, verify Chrome and Comet browsers
+- [x] 01-05-PLAN.md — Implement history backfill, wire into startup, verify Chrome and Comet browsers
 
 ### Phase 2: Data Export Pipeline
 **Goal**: Captured browsing data can be extracted from extension storage into a format suitable for batch processing
@@ -116,7 +116,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Browser Extension Foundation | 4/5 | In Progress|  |
+| 1. Browser Extension Foundation | 5/5 | Complete   | 2026-04-10 |
 | 2. Data Export Pipeline | 0/? | Not started | - |
 | 3. Daily Note Generation | 0/? | Not started | - |
 | 4. Content Processing | 0/? | Not started | - |

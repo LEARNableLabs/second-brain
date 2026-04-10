@@ -57,7 +57,12 @@ Plans:
   4. Exported data includes schema version number (enables future migrations)
   5. Export validates data structure and reports any corruption or missing fields
   6. User can trigger export manually as fallback if automation fails
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Monorepo scaffold, shared types package, and SQLite database layer
+- [ ] 02-02-PLAN.md — Chrome Native Messaging bridge and extension message handler
+- [ ] 02-03-PLAN.md — CLI export command with end-to-end verification
 
 ### Phase 3: Daily Note Generation
 **Goal**: Users can see their browsing activity organized as daily Obsidian-compatible markdown files
@@ -127,7 +132,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Browser Extension Foundation | 5/5 | Complete    | 2026-04-10 |
-| 2. Data Export Pipeline | 0/? | Not started | - |
+| 2. Data Export Pipeline | 0/3 | Not started | - |
 | 3. Daily Note Generation | 0/? | Not started | - |
 | 4. Content Processing | 0/? | Not started | - |
 | 5. AI Curation | 0/? | Not started | - |
@@ -143,4 +148,4 @@ Current milestone: **v1.0 - Initial Release**
 
 ---
 *Roadmap created: 2026-04-09*
-*Last updated: 2026-04-09*
+*Last updated: 2026-04-10*

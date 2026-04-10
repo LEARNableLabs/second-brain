@@ -66,6 +66,51 @@ export async function saveCapture(entry: CaptureEntry): Promise<boolean> {
 }
 
 /**
+ * Save a manual capture, bypassing blocklist.
+ * D-06: If URL already captured today as 'live' or 'backfill', upgrade source to 'manual'.
+ * @returns true if saved or upgraded, false on error
+ */
+export async function saveManualCapture(url: string, title: string, domain: string): Promise<boolean> {
+  const today = getToday();
+  const result = await browser.storage.local.get('captures');
+  const captures: Record<string, CaptureEntry[]> = (result.captures as Record<string, CaptureEntry[]>) || {};
+
+  if (!captures[today]) {
+    captures[today] = [];
+  }
+
+  // Check if already captured today — upgrade to 'manual' if so
+  const existing = captures[today].find((c: CaptureEntry) => c.url === url);
+  if (existing) {
+    existing.source = 'manual';
+    await browser.storage.local.set({
+      captures,
+      lastCaptureTimestamp: Date.now(),
+    });
+    return true;
+  }
+
+  // New manual capture
+  const entry: CaptureEntry = {
+    url,
+    title,
+    domain,
+    timestamp: Date.now(),
+    source: 'manual',
+  };
+
+  const validated = CaptureEntrySchema.parse(entry);
+  captures[today].push(validated);
+
+  await browser.storage.local.set({
+    captures,
+    lastCaptureTimestamp: Date.now(),
+  });
+
+  return true;
+}
+
+/**
  * Get count of captures for today
  */
 export async function getTodayCount(): Promise<number> {

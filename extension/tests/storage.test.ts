@@ -1,9 +1,10 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   CaptureEntrySchema,
   StorageStateSchema,
   BlocklistConfigSchema
 } from '../components/types';
+import { saveManualCapture, getToday } from '../components/storage';
 import { ZodError } from 'zod';
 
 describe('CaptureEntrySchema', () => {
@@ -66,6 +67,19 @@ describe('CaptureEntrySchema', () => {
 
     const result = CaptureEntrySchema.parse(validEntry);
     expect(result.source).toBe('backfill');
+  });
+
+  it('accepts manual as source value', () => {
+    const validEntry = {
+      url: 'https://example.com',
+      title: 'Example Page',
+      domain: 'example.com',
+      timestamp: Date.now(),
+      source: 'manual' as const,
+    };
+
+    const result = CaptureEntrySchema.parse(validEntry);
+    expect(result.source).toBe('manual');
   });
 });
 
@@ -159,5 +173,92 @@ describe('BlocklistConfigSchema', () => {
     };
 
     expect(() => BlocklistConfigSchema.parse(invalidConfig)).toThrow(ZodError);
+  });
+});
+
+describe('saveManualCapture', () => {
+  let mockStorageData: Record<string, any>;
+
+  beforeEach(() => {
+    mockStorageData = {};
+    const chromeStorage = (globalThis as any).chrome.storage.local;
+    chromeStorage.get.mockImplementation(async (keys?: string | string[]) => {
+      if (!keys) return { ...mockStorageData };
+      if (typeof keys === 'string') return { [keys]: mockStorageData[keys] };
+      const result: Record<string, any> = {};
+      if (Array.isArray(keys)) {
+        keys.forEach((key: string) => { result[key] = mockStorageData[key]; });
+      }
+      return result;
+    });
+    chromeStorage.set.mockImplementation(async (items: Record<string, any>) => {
+      Object.assign(mockStorageData, items);
+    });
+  });
+
+  it('saves a new manual capture entry', async () => {
+    const result = await saveManualCapture('https://example.com', 'Example', 'example.com');
+    expect(result).toBe(true);
+
+    const today = getToday();
+    expect(mockStorageData.captures[today]).toHaveLength(1);
+    expect(mockStorageData.captures[today][0].source).toBe('manual');
+    expect(mockStorageData.captures[today][0].url).toBe('https://example.com');
+  });
+
+  it('upgrades existing live entry to manual', async () => {
+    const today = getToday();
+    mockStorageData.captures = {
+      [today]: [{
+        url: 'https://example.com',
+        title: 'Example',
+        domain: 'example.com',
+        timestamp: Date.now() - 60000,
+        source: 'live',
+      }],
+    };
+
+    const result = await saveManualCapture('https://example.com', 'Example', 'example.com');
+    expect(result).toBe(true);
+
+    // Should still be one entry, not two (D-05 dedup maintained)
+    expect(mockStorageData.captures[today]).toHaveLength(1);
+    // Source should be upgraded to manual
+    expect(mockStorageData.captures[today][0].source).toBe('manual');
+  });
+
+  it('upgrades existing backfill entry to manual', async () => {
+    const today = getToday();
+    mockStorageData.captures = {
+      [today]: [{
+        url: 'https://example.com',
+        title: 'Example',
+        domain: 'example.com',
+        timestamp: Date.now() - 60000,
+        source: 'backfill',
+      }],
+    };
+
+    const result = await saveManualCapture('https://example.com', 'Example', 'example.com');
+    expect(result).toBe(true);
+    expect(mockStorageData.captures[today]).toHaveLength(1);
+    expect(mockStorageData.captures[today][0].source).toBe('manual');
+  });
+
+  it('saves manual capture on blocked domain (bypasses blocklist)', async () => {
+    // saveManualCapture does not check blocklist — that's the point
+    const result = await saveManualCapture('https://gmail.com/inbox', 'Gmail', 'gmail.com');
+    expect(result).toBe(true);
+
+    const today = getToday();
+    expect(mockStorageData.captures[today]).toHaveLength(1);
+    expect(mockStorageData.captures[today][0].domain).toBe('gmail.com');
+    expect(mockStorageData.captures[today][0].source).toBe('manual');
+  });
+
+  it('updates lastCaptureTimestamp on manual save', async () => {
+    const before = Date.now();
+    await saveManualCapture('https://example.com', 'Example', 'example.com');
+    expect(mockStorageData.lastCaptureTimestamp).toBeGreaterThanOrEqual(before);
   });
 });

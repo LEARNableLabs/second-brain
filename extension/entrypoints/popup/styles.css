@@ -197,6 +197,33 @@ input:checked + .slider:before {
   gap: var(--md);
 }
 
+.btn-save {
+  width: 100%;
+  padding: var(--sm) var(--md);
+  background-color: #2563EB;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-save:hover {
+  background-color: #1D4ED8;
+}
+
+.btn-save:disabled {
+  background-color: #E5E7EB;
+  color: #9CA3AF;
+  cursor: not-allowed;
+}
+
+.btn-save.saved {
+  background-color: #16A34A;
+}
+
 .btn-block {
   width: 100%;
   padding: var(--sm) var(--md);

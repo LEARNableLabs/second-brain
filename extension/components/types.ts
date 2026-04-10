@@ -6,7 +6,7 @@ export const CaptureEntrySchema = z.object({
   title: z.string(),
   domain: z.string(),
   timestamp: z.number(),
-  source: z.enum(['live', 'backfill']),
+  source: z.enum(['live', 'backfill', 'manual']),
 });
 export type CaptureEntry = z.infer<typeof CaptureEntrySchema>;
 

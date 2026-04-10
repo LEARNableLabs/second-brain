@@ -1,5 +1,5 @@
 import browser from 'webextension-polyfill';
-import { getTodayCount, getLastCapture, saveStorage, loadStorage } from '../../components/storage';
+import { getTodayCount, getLastCapture, saveStorage, loadStorage, saveManualCapture } from '../../components/storage';
 import { addToBlocklist, loadBlocklist, isBlocked } from '../../components/blocklist';
 
 /**
@@ -116,6 +116,14 @@ export async function initPopup(): Promise<void> {
       const skiplist = await loadBlocklist();
       const alreadySkipped = isBlocked(domain, skiplist);
 
+      // Save button — works on any http(s) page, including blocked domains
+      const saveButton = document.getElementById('saveButton') as HTMLButtonElement;
+      if (saveButton) {
+        saveButton.dataset.url = currentTab.url;
+        saveButton.dataset.title = currentTab.title || '';
+        saveButton.dataset.domain = domain;
+      }
+
       const blockButton = document.getElementById('blockButton') as HTMLButtonElement;
       if (blockButton) {
         if (alreadySkipped) {
@@ -129,7 +137,11 @@ export async function initPopup(): Promise<void> {
         }
       }
     } else {
-      // Non-http page (chrome://, about://, etc.) — hide skip button
+      // Non-http page (chrome://, about://, etc.) — hide both buttons
+      const saveButton = document.getElementById('saveButton') as HTMLButtonElement;
+      if (saveButton) {
+        saveButton.style.display = 'none';
+      }
       const blockButton = document.getElementById('blockButton') as HTMLButtonElement;
       if (blockButton) {
         blockButton.style.display = 'none';
@@ -165,6 +177,28 @@ function attachEventListeners(): void {
 
       // Update UI
       updatePauseUI(isPaused);
+    });
+  }
+
+  // Manual save button
+  const saveButton = document.getElementById('saveButton') as HTMLButtonElement;
+  if (saveButton) {
+    saveButton.addEventListener('click', async () => {
+      const url = saveButton.dataset.url;
+      const title = saveButton.dataset.title || '';
+      const domain = saveButton.dataset.domain || '';
+      if (!url) return;
+
+      try {
+        await saveManualCapture(url, title, domain);
+        saveButton.textContent = '✓ Saved';
+        saveButton.classList.add('saved');
+        saveButton.disabled = true;
+        showToast('Page saved — will appear in highlights');
+      } catch (error) {
+        console.error('Failed to save manually:', error);
+        showToast('Failed to save page');
+      }
     });
   }
 

@@ -60,8 +60,8 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Monorepo scaffold, shared types package, and SQLite database layer
-- [ ] 02-02-PLAN.md — Chrome Native Messaging bridge and extension message handler
+- [x] 02-01-PLAN.md — Monorepo scaffold, shared types package, and SQLite database layer
+- [x] 02-02-PLAN.md — Chrome Native Messaging bridge and extension message handler
 - [ ] 02-03-PLAN.md — CLI export command with end-to-end verification
 
 ### Phase 3: Daily Note Generation

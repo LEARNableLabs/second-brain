@@ -41,12 +41,13 @@ export async function detectGap(): Promise<number | null> {
   const storage = await loadStorage();
   const { lastCaptureTimestamp } = storage;
 
-  // First run - no baseline
+  const now = Date.now();
+
+  // First run — backfill last 24 hours of history
   if (lastCaptureTimestamp === 0) {
-    return null;
+    return now - (24 * 60 * 60 * 1000);
   }
 
-  const now = Date.now();
   const elapsed = now - lastCaptureTimestamp;
 
   // No gap - recent capture

@@ -115,7 +115,7 @@ export async function initPopup(): Promise<void> {
 
       const blockButton = document.getElementById('blockButton') as HTMLButtonElement;
       if (blockButton) {
-        blockButton.textContent = `Block this site: ${domain}`;
+        blockButton.textContent = `Skip this domain: ${domain}`;
         blockButton.disabled = false;
         blockButton.dataset.domain = domain;
       }
@@ -125,7 +125,7 @@ export async function initPopup(): Promise<void> {
     console.error('Failed to get current tab URL:', error);
     const blockButton = document.getElementById('blockButton') as HTMLButtonElement;
     if (blockButton) {
-      blockButton.textContent = 'Block this site';
+      blockButton.textContent = 'Skip this domain';
       blockButton.disabled = true;
     }
   }
@@ -162,10 +162,10 @@ function attachEventListeners(): void {
 
       try {
         await addToBlocklist(domain);
-        showToast(`Blocked: ${domain}`);
+        showToast(`Skipped: ${domain}`);
       } catch (error) {
         console.error('Failed to add to blocklist:', error);
-        showToast('Failed to block site');
+        showToast('Failed to skip site');
       }
     });
   }
@@ -176,7 +176,7 @@ function attachEventListeners(): void {
     editLink.addEventListener('click', (e) => {
       e.preventDefault();
       // D-10: No options page in Phase 1 - show informational toast
-      showToast('Blocklist editing via UI coming soon. Edit blocklist.json for now.');
+      showToast('Edit skiplist.json to manage skipped sites.');
     });
   }
 }

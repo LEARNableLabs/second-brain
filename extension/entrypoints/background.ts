@@ -185,4 +185,16 @@ export default defineBackground(() => {
   browser.tabs.onRemoved.addListener(handleTabRemoved);
   browser.runtime.onInstalled.addListener(handleInstall);
   browser.runtime.onStartup.addListener(handleStartup);
+
+  // D-11: Run backfill on every service worker init (covers re-enable, update, startup)
+  // onStartup only fires on browser launch; this catches extension disable/re-enable too
+  detectGap().then((gapStart) => {
+    if (gapStart !== null) {
+      backfillHistory(gapStart).then((count) => {
+        console.log(`Second Brain Capture: backfilled ${count} entries`);
+      });
+    }
+  }).catch((err) => {
+    console.error('Second Brain Capture: backfill error', err);
+  });
 });

@@ -42,12 +42,19 @@ describe('detectGap', () => {
     vi.useRealTimers();
   });
 
-  it('returns null when lastCaptureTimestamp is 0 (first run, no baseline)', async () => {
+  it('returns a 24-hour lookback timestamp on first run (lastCaptureTimestamp is 0)', async () => {
+    const now = Date.now();
+    vi.useFakeTimers();
+    vi.setSystemTime(now);
+
     mockStorage.get.mockResolvedValue({ lastCaptureTimestamp: 0 });
 
     const result = await detectGap();
 
-    expect(result).toBeNull();
+    // Should return now - 24 hours (backfill last day on first run)
+    expect(result).toBe(now - (24 * 60 * 60 * 1000));
+
+    vi.useRealTimers();
   });
 
   it('returns null when lastCaptureTimestamp is within last 5 minutes (no gap)', async () => {
@@ -90,7 +97,8 @@ describe('backfillHistory', () => {
   });
 
   it('calls browser.history.search with correct startTime and endTime', async () => {
-    const now = Date.now();
+    // Use noon UTC to avoid date boundary issues when oneHourAgo crosses midnight
+    const now = new Date('2026-04-10T12:00:00.000Z').getTime();
     const oneHourAgo = now - (60 * 60 * 1000);
 
     vi.useFakeTimers();
@@ -142,7 +150,8 @@ describe('backfillHistory', () => {
   });
 
   it('filters out blocked domains from history results', async () => {
-    const now = Date.now();
+    // Use noon UTC to avoid date boundary issues when oneHourAgo crosses midnight
+    const now = new Date('2026-04-10T12:00:00.000Z').getTime();
     const oneHourAgo = now - (60 * 60 * 1000);
 
     vi.useFakeTimers();
@@ -176,7 +185,8 @@ describe('backfillHistory', () => {
   });
 
   it('creates entries with source "backfill" (not "live")', async () => {
-    const now = Date.now();
+    // Use noon UTC to avoid date boundary issues when oneHourAgo crosses midnight
+    const now = new Date('2026-04-10T12:00:00.000Z').getTime();
     const oneHourAgo = now - (60 * 60 * 1000);
 
     vi.useFakeTimers();
@@ -204,12 +214,14 @@ describe('backfillHistory', () => {
   });
 
   it('deduplicates against existing captures for the same day', async () => {
-    const now = Date.now();
+    // Use noon UTC to avoid date boundary issues
+    const now = new Date('2026-04-10T12:00:00.000Z').getTime();
     const oneHourAgo = now - (60 * 60 * 1000);
-    const today = new Date().toISOString().split('T')[0];
 
     vi.useFakeTimers();
     vi.setSystemTime(now);
+
+    const today = new Date().toISOString().split('T')[0];
 
     // Pre-existing captures for today (one duplicate URL)
     mockStorage.get.mockResolvedValue({
@@ -240,7 +252,8 @@ describe('backfillHistory', () => {
   });
 
   it('sets maxResults to BACKFILL_MAX_RESULTS (1000)', async () => {
-    const now = Date.now();
+    // Use noon UTC to avoid date boundary issues when oneHourAgo crosses midnight
+    const now = new Date('2026-04-10T12:00:00.000Z').getTime();
     const oneHourAgo = now - (60 * 60 * 1000);
 
     vi.useFakeTimers();
@@ -262,7 +275,8 @@ describe('backfillHistory', () => {
   });
 
   it('updates lastCaptureTimestamp to current time after completion', async () => {
-    const now = Date.now();
+    // Use noon UTC to avoid date boundary issues when oneHourAgo crosses midnight
+    const now = new Date('2026-04-10T12:00:00.000Z').getTime();
     const oneHourAgo = now - (60 * 60 * 1000);
 
     vi.useFakeTimers();
@@ -288,7 +302,8 @@ describe('backfillHistory', () => {
   });
 
   it('filters out non-http URLs (chrome://, about://, etc.)', async () => {
-    const now = Date.now();
+    // Use noon UTC to avoid date boundary issues when oneHourAgo crosses midnight
+    const now = new Date('2026-04-10T12:00:00.000Z').getTime();
     const oneHourAgo = now - (60 * 60 * 1000);
 
     vi.useFakeTimers();
@@ -321,7 +336,8 @@ describe('backfillHistory', () => {
   });
 
   it('returns count of entries backfilled', async () => {
-    const now = Date.now();
+    // Use noon UTC to avoid date boundary issues when oneHourAgo crosses midnight
+    const now = new Date('2026-04-10T12:00:00.000Z').getTime();
     const oneHourAgo = now - (60 * 60 * 1000);
 
     vi.useFakeTimers();

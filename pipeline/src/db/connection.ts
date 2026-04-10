@@ -4,7 +4,21 @@ import fs from 'fs';
 import os from 'os';
 
 function getDataDir(): string {
-  return process.env.SECOND_BRAIN_DATA_DIR || path.join(os.homedir(), '.second-brain');
+  const envDir = process.env.SECOND_BRAIN_DATA_DIR;
+  if (envDir) {
+    // Validate against path traversal: ensure it resolves to a directory under user's home or temp
+    const resolved = path.resolve(envDir);
+    const homeDir = os.homedir();
+    const tmpDir = os.tmpdir();
+
+    if (!resolved.startsWith(homeDir) && !resolved.startsWith(tmpDir)) {
+      throw new Error(`Invalid SECOND_BRAIN_DATA_DIR: must be under home (${homeDir}) or temp (${tmpDir}), got ${resolved}`);
+    }
+
+    return resolved;
+  }
+
+  return path.join(os.homedir(), '.second-brain');
 }
 
 export function getDatabase(): Database.Database {

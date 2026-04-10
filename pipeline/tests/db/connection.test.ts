@@ -44,4 +44,14 @@ describe('Database Connection', () => {
     expect(secondRun.current).toBe(1);
     closeDatabase(db);
   });
+
+  it('Test 5: getDatabase() rejects path traversal in SECOND_BRAIN_DATA_DIR', () => {
+    const originalEnv = process.env.SECOND_BRAIN_DATA_DIR;
+    try {
+      process.env.SECOND_BRAIN_DATA_DIR = '/etc/passwd';
+      expect(() => getDatabase()).toThrow(/Invalid SECOND_BRAIN_DATA_DIR/);
+    } finally {
+      process.env.SECOND_BRAIN_DATA_DIR = originalEnv;
+    }
+  });
 });

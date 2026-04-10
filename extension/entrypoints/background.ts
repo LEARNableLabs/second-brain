@@ -2,6 +2,8 @@ import browser from 'webextension-polyfill';
 import { startTracking, cancelTracking } from '../components/dwell-tracker';
 import { loadBlocklist, isBlocked, loadDefaultBlocklist, flattenBlocklist } from '../components/blocklist';
 import { detectGap, backfillHistory } from '../components/history-backfill';
+import { loadStorage, saveStorage } from '../components/storage';
+import type { CaptureEntry } from '../components/types';
 
 /**
  * Background Service Worker - Event-Driven Capture Engine
@@ -173,6 +175,39 @@ export async function handleStartup(): Promise<void> {
 }
 
 /**
+ * Handle export request: return all captures from chrome.storage
+ * D-03: Mark captures with exportedAt timestamp for 7-day retention tracking
+ */
+export async function handleGetCaptures(): Promise<{
+  captures: Record<string, CaptureEntry[]>;
+  exportedAt: number;
+}> {
+  const state = await loadStorage();
+  const captures = state.captures || {};
+  const exportedAt = Date.now();
+
+  // D-03: Store export timestamp for 7-day retention tracking
+  // Clean up entries older than 7 days since last export
+  const sevenDaysAgo = exportedAt - (7 * 24 * 60 * 60 * 1000);
+  const retainedCaptures: Record<string, CaptureEntry[]> = {};
+  for (const [dateKey, entries] of Object.entries(captures)) {
+    // Parse date key to check age
+    const dateMs = new Date(dateKey + 'T00:00:00').getTime();
+    if (dateMs >= sevenDaysAgo) {
+      retainedCaptures[dateKey] = entries;
+    }
+  }
+
+  // Save cleaned captures and export timestamp back to storage
+  await saveStorage({
+    captures: retainedCaptures,
+    lastExportTimestamp: exportedAt,
+  } as any); // lastExportTimestamp is new -- extend StorageState in future cleanup
+
+  return { captures, exportedAt };
+}
+
+/**
  * Service worker entrypoint
  * CRITICAL: All event listeners MUST be registered synchronously at top level
  */
@@ -185,6 +220,19 @@ export default defineBackground(() => {
   browser.tabs.onRemoved.addListener(handleTabRemoved);
   browser.runtime.onInstalled.addListener(handleInstall);
   browser.runtime.onStartup.addListener(handleStartup);
+
+  // Handle messages from native messaging host (Phase 2: Data Export Pipeline)
+  // The CLI triggers export by launching the native host, which sends a message to the extension.
+  // Extension responds with current captures from chrome.storage.
+  browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'getCaptures') {
+      handleGetCaptures().then(sendResponse).catch(err => {
+        console.error('Error handling getCaptures:', err);
+        sendResponse({ error: String(err) });
+      });
+      return true; // Indicates async response
+    }
+  });
 
   // D-11: Run backfill on every service worker init (covers re-enable, update, startup)
   // onStartup only fires on browser launch; this catches extension disable/re-enable too

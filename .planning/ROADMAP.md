@@ -36,6 +36,16 @@ Plans:
 - [x] 01-04-PLAN.md — Implement popup UI (status dashboard, pause toggle, quick-block button)
 - [x] 01-05-PLAN.md — Implement history backfill, wire into startup, verify Chrome and Comet browsers
 
+### Phase 01.1: Manual Capture (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 1
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 01.1 to break down)
+
 ### Phase 2: Data Export Pipeline
 **Goal**: Captured browsing data can be extracted from extension storage into a format suitable for batch processing
 **Depends on**: Phase 1

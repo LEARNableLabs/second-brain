@@ -88,6 +88,10 @@ From research SUMMARY.md:
 - **Standard patterns identified**: Extension (WXT), Export (Node.js), Markdown generation, Wikilinks, Scheduling (launchd), Email (gws CLI)
 - **Critical pitfalls mapped**: Service worker context confusion (Phase 1), vault corruption (Phase 3), permission rejection (Phase 1), AI hallucination (Phase 5), token costs (Phase 5)
 
+### Roadmap Evolution
+
+- Phase 01.1 inserted after Phase 1: Manual Capture (URGENT) — "Save this page" button, source enum extension, blocklist bypass
+
 ### Architecture Notes
 
 **7-phase structure:**

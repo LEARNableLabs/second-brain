@@ -178,6 +178,15 @@ Use these entry points:
 - `/gsd-execute-phase` for planned phase work
 
 Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
+
+### Speed Over Ceremony
+
+This is a small, single-developer project. Match process weight to task complexity:
+- **Simple/well-scoped changes** (< ~5 files, clear requirements): Use `/gsd-quick` or just implement directly. Skip discuss/research/plan phases.
+- **Medium changes** (new feature touching multiple modules): Plan briefly, then execute. Skip research agents.
+- **Complex/ambiguous changes** (new architecture, multiple unknowns): Use the full discuss → plan → execute cycle.
+
+When in doubt, bias toward speed. The user can always ask for more rigor if needed.
 <!-- GSD:workflow-end -->
 
 

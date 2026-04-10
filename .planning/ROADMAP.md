@@ -116,7 +116,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Browser Extension Foundation | 5/5 | Complete   | 2026-04-10 |
+| 1. Browser Extension Foundation | 5/5 | Complete    | 2026-04-10 |
 | 2. Data Export Pipeline | 0/? | Not started | - |
 | 3. Daily Note Generation | 0/? | Not started | - |
 | 4. Content Processing | 0/? | Not started | - |

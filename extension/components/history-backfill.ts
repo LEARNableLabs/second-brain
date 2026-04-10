@@ -130,8 +130,9 @@ export async function backfillHistory(gapStartTimestamp: number): Promise<number
       source: 'backfill',
     };
 
-    // Deduplicate per day (D-05)
-    const dayKey = new Date(entry.timestamp).toISOString().split('T')[0];
+    // Deduplicate per day (D-05) — use local date to match getToday()
+    const d = new Date(entry.timestamp);
+    const dayKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
     if (!captures[dayKey]) {
       captures[dayKey] = [];

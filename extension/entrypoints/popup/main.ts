@@ -77,9 +77,10 @@ export async function initPopup(): Promise<void> {
     updatePauseUI(isPaused);
   }
 
-  // Load today's count and last capture
+  // Load today's count and last capture timestamp
   const todayCount = await getTodayCount();
   const lastCapture = await getLastCapture();
+  const lastTimestamp = storage.lastCaptureTimestamp;
 
   // Update stats or show empty state
   const statsSection = document.getElementById('statsSection');
@@ -98,8 +99,8 @@ export async function initPopup(): Promise<void> {
 
     if (todayCountEl) todayCountEl.textContent = String(todayCount);
 
-    if (lastCaptureEl && lastCapture) {
-      const elapsed = Date.now() - lastCapture.timestamp;
+    if (lastCaptureEl && lastTimestamp > 0) {
+      const elapsed = Date.now() - lastTimestamp;
       lastCaptureEl.textContent = formatTimeAgo(elapsed);
     }
   }
@@ -109,7 +110,7 @@ export async function initPopup(): Promise<void> {
     const tabs = await browser.tabs.query({ active: true, currentWindow: true });
     const currentTab = tabs[0];
 
-    if (currentTab && currentTab.url) {
+    if (currentTab && currentTab.url && (currentTab.url.startsWith('http://') || currentTab.url.startsWith('https://'))) {
       const url = new URL(currentTab.url);
       const domain = url.hostname;
 
@@ -118,6 +119,12 @@ export async function initPopup(): Promise<void> {
         blockButton.textContent = `Skip this domain: ${domain}`;
         blockButton.disabled = false;
         blockButton.dataset.domain = domain;
+      }
+    } else {
+      // Non-http page (chrome://, about://, etc.) — hide skip button
+      const blockButton = document.getElementById('blockButton') as HTMLButtonElement;
+      if (blockButton) {
+        blockButton.style.display = 'none';
       }
     }
   } catch (error) {

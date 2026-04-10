@@ -220,6 +220,12 @@ input:checked + .slider:before {
   cursor: not-allowed;
 }
 
+.btn-block.already-skipped {
+  background-color: #F5F5F5;
+  color: #6B7280;
+  border: 1px solid #E5E7EB;
+}
+
 .link-edit {
   align-self: center;
   color: #6B7280;

@@ -1,6 +1,6 @@
 import browser from 'webextension-polyfill';
 import { getTodayCount, getLastCapture, saveStorage, loadStorage } from '../../components/storage';
-import { addToBlocklist } from '../../components/blocklist';
+import { addToBlocklist, loadBlocklist, isBlocked } from '../../components/blocklist';
 
 /**
  * Format elapsed time into human-readable string
@@ -113,12 +113,20 @@ export async function initPopup(): Promise<void> {
     if (currentTab && currentTab.url && (currentTab.url.startsWith('http://') || currentTab.url.startsWith('https://'))) {
       const url = new URL(currentTab.url);
       const domain = url.hostname;
+      const skiplist = await loadBlocklist();
+      const alreadySkipped = isBlocked(domain, skiplist);
 
       const blockButton = document.getElementById('blockButton') as HTMLButtonElement;
       if (blockButton) {
-        blockButton.textContent = `Skip this domain: ${domain}`;
-        blockButton.disabled = false;
-        blockButton.dataset.domain = domain;
+        if (alreadySkipped) {
+          blockButton.textContent = `Skipping: ${domain}`;
+          blockButton.disabled = true;
+          blockButton.classList.add('already-skipped');
+        } else {
+          blockButton.textContent = `Skip this domain: ${domain}`;
+          blockButton.disabled = false;
+          blockButton.dataset.domain = domain;
+        }
       }
     } else {
       // Non-http page (chrome://, about://, etc.) — hide skip button

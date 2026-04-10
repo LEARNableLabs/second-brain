@@ -1,0 +1,17 @@
+{
+  "name": "second-brain",
+  "private": true,
+  "workspaces": [
+    "extension",
+    "pipeline",
+    "shared"
+  ],
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "scripts": {
+    "test": "npm run test --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present"
+  }
+}

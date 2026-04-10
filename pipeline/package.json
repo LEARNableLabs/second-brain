@@ -1,0 +1,25 @@
+{
+  "name": "pipeline",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "second-brain": "./bin/second-brain.js"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build": "tsc",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@second-brain/shared": "*",
+    "better-sqlite3": "^12.8.0",
+    "commander": "^14.0.3",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.4"
+  }
+}

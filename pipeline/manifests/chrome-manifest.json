@@ -1,0 +1,9 @@
+{
+  "name": "com.second_brain.export_host",
+  "description": "Second Brain - Export browsing captures to local database",
+  "path": "PLACEHOLDER_ABSOLUTE_PATH",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://PLACEHOLDER_EXTENSION_ID/"
+  ]
+}

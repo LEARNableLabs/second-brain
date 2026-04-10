@@ -14,6 +14,7 @@
   "dependencies": {
     "@second-brain/shared": "*",
     "better-sqlite3": "^12.8.0",
+    "chrome-native-messaging": "^0.2.0",
     "commander": "^14.0.3",
     "zod": "^4.3.6"
   },

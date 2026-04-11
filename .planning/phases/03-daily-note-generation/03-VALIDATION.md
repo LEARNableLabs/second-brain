@@ -2,8 +2,8 @@
 phase: 3
 slug: daily-note-generation
 status: draft
-nyquist_compliant: false
-wave_0_complete: false
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-04-10
 ---
 
@@ -34,27 +34,29 @@ created: 2026-04-10
 
 ---
 
-## Per-Task Verification Map
+## Wave 0 Compliance
 
-| Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 03-01-01 | 01 | 1 | NOTE-01 | — | N/A | unit | `npm run test --workspace=pipeline` | ❌ W0 | ⬜ pending |
-| 03-01-02 | 01 | 1 | NOTE-02 | — | N/A | unit | `npm run test --workspace=pipeline` | ❌ W0 | ⬜ pending |
-| 03-01-03 | 01 | 1 | NOTE-03 | — | N/A | unit | `npm run test --workspace=pipeline` | ❌ W0 | ⬜ pending |
-| 03-02-01 | 02 | 1 | STOR-04 | — | N/A | unit | `npm run test --workspace=pipeline` | ❌ W0 | ⬜ pending |
-| 03-02-02 | 02 | 1 | STOR-05 | — | N/A | unit | `npm run test --workspace=pipeline` | ❌ W0 | ⬜ pending |
-| 03-02-03 | 02 | 1 | STOR-06 | — | N/A | unit | `npm run test --workspace=pipeline` | ❌ W0 | ⬜ pending |
+All three plans use `type: tdd` with `tdd="true"` tasks. The TDD RED phase inherently satisfies Wave 0: tests are written BEFORE implementation code. Each task's `<behavior>` block defines test expectations, and the RED phase creates the test file as the first step. No separate Wave 0 stub tasks are needed because TDD plans create tests as part of their execution cycle.
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+- Plan 03-01 (Task 1, TDD): Creates `pipeline/tests/generators/markdown.test.ts` in RED phase before implementing `markdown.ts` and `frontmatter.ts`
+- Plan 03-02 (Task 1, TDD): Creates `pipeline/tests/config/reader.test.ts` in RED phase before implementing `reader.ts` and `writer.ts`
+- Plan 03-02 (Task 2, TDD): Creates `pipeline/tests/git/auto-commit.test.ts` in RED phase before implementing `auto-commit.ts`
+- Plan 03-03 (Task 1, TDD): Creates `pipeline/tests/generators/meta-fetcher.test.ts` in RED phase before implementing `meta-fetcher.ts`
+- Plan 03-03 (Task 2, TDD): Creates `pipeline/tests/commands/generate.test.ts` in RED phase before implementing `generate.ts`
 
 ---
 
-## Wave 0 Requirements
+## Per-Task Verification Map
 
-- [ ] `pipeline/src/commands/__tests__/generate.test.ts` — stubs for NOTE-01, NOTE-02, NOTE-03
-- [ ] `pipeline/src/generators/__tests__/markdown.test.ts` — stubs for markdown generation
-- [ ] `pipeline/src/generators/__tests__/meta-fetcher.test.ts` — stubs for meta description fetching
-- [ ] `pipeline/src/git/__tests__/auto-commit.test.ts` — stubs for STOR-06
+| Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | Test File | Status |
+|---------|------|------|-------------|------------|-----------------|-----------|-------------------|-----------|--------|
+| 03-01-01 | 01 | 1 | NOTE-01, NOTE-02, STOR-04 | T-03-01, T-03-02 | Escape markdown, safe YAML | unit | `npm run test --workspace=pipeline` | `pipeline/tests/generators/markdown.test.ts` | TDD |
+| 03-02-01 | 02 | 1 | STOR-05 | T-03-03, T-03-05 | Path validation, atomic write | unit | `npm run test --workspace=pipeline` | `pipeline/tests/config/reader.test.ts` | TDD |
+| 03-02-02 | 02 | 1 | STOR-06 | T-03-04 | Library API, no shell injection | integration | `npm run test --workspace=pipeline` | `pipeline/tests/git/auto-commit.test.ts` | TDD |
+| 03-03-01 | 03 | 2 | NOTE-03 | T-03-06, T-03-08 | Timeout, no credentials | unit | `npm run test --workspace=pipeline` | `pipeline/tests/generators/meta-fetcher.test.ts` | TDD |
+| 03-03-02 | 03 | 2 | NOTE-03, STOR-04, STOR-05, STOR-06 | T-03-07 | Date validation | integration | `npm run test --workspace=pipeline` | `pipeline/tests/commands/generate.test.ts` | TDD |
+
+*Status: TDD = test written in RED phase before implementation*
 
 ---
 
@@ -69,11 +71,11 @@ created: 2026-04-10
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 10s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references — N/A, TDD plans create tests in RED phase
+- [x] No watch-mode flags
+- [x] Feedback latency < 10s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** ready

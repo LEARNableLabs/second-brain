@@ -16,6 +16,8 @@
     "better-sqlite3": "^12.8.0",
     "chrome-native-messaging": "^0.2.0",
     "commander": "^14.0.3",
+    "gray-matter": "^4.0.3",
+    "write-file-atomic": "^7.0.1",
     "zod": "^4.3.6"
   },
   "devDependencies": {

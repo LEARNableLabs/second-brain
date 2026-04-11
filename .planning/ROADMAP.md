@@ -80,9 +80,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Markdown generation engine with YAML frontmatter and domain-grouped browsing log (TDD)
-- [ ] 03-02-PLAN.md — Config reader, atomic file writer, and git auto-commit infrastructure (TDD)
-- [ ] 03-03-PLAN.md — Meta description fetcher and CLI generate command wiring all components
+- [x] 03-01-PLAN.md — Markdown generation engine with YAML frontmatter and domain-grouped browsing log (TDD)
+- [x] 03-02-PLAN.md — Config reader, atomic file writer, and git auto-commit infrastructure (TDD)
+- [x] 03-03-PLAN.md — Meta description fetcher and CLI generate command wiring all components
 
 ### Phase 4: Content Processing
 **Goal**: System can fetch and analyze full page content to enable substantive AI summaries

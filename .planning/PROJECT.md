@@ -12,26 +12,25 @@ Every page you visit is captured and intelligently surfaced — you never lose t
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] Browser extension captures URLs, titles, and metadata from Chrome and Comet — Validated in Phase 1
+- [x] Browser history export as fallback when extension isn't running — Validated in Phase 1
+- [x] Smart default blocklist filters out noisy sites — Validated in Phase 1
+- [x] Users can customize the blocklist/allowlist via config file — Validated in Phase 1
+- [x] Browsing data is logged to a daily resource page in the vault — Validated in Phase 3
+- [x] Daily resource page has a raw chronological timeline log with timestamps — Validated in Phase 3
+- [x] New items appended incrementally each processing cycle (hourly) — Validated in Phase 3 (via regeneration)
+- [x] Only metadata + URLs + AI summaries stored in vault — Validated in Phase 3
 
 ### Active
 
-- [ ] Browser extension captures URLs, titles, and metadata from Chrome and Comet
-- [ ] Browser history export as fallback when extension isn't running
-- [ ] Browsing data is logged to a daily resource page in the vault
-- [ ] Smart default blocklist filters out noisy sites (Gmail, Google Search, banking, social media)
-- [ ] Users can customize the blocklist/allowlist via config file
-- [ ] Daily resource page has a raw chronological timeline log with timestamps
 - [ ] AI fetches and processes full page content for deep analysis (arxiv papers, blog posts, articles)
 - [ ] AI generates a curated summary section at the top of the daily page (rolling, regenerated each run)
 - [ ] AI clusters related items by topic (e.g. "you looked at 4 RL papers today")
-- [ ] New items appended incrementally each processing cycle (hourly)
 - [ ] Curated items auto-link to existing vault notes via [[wikilinks]] when topics match
 - [ ] LLM provider is swappable (Claude API default, local LLM option)
 - [ ] Processing runs hourly via launchd, with end-of-day final consolidation pass
 - [ ] Morning email digest with highlights sent via Gmail
 - [ ] Claude Code skill to capture AI conversation topics/summaries to daily page
-- [ ] Only metadata + URLs + AI summaries stored in vault (full content is ephemeral, discarded after processing)
 
 ### Out of Scope
 
@@ -92,4 +91,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-09 after requirements refinement*
+*Last updated: 2026-04-10 after Phase 3 completion*

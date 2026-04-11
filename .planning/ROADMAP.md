@@ -77,8 +77,12 @@ Plans:
   6. User can regenerate a daily note from the database if the vault file is corrupted or deleted
   7. User can configure output to go inside an Obsidian vault (default) or to a standalone folder
   8. Each processing cycle auto-commits the final .md files to git in the output folder (only markdown tracked, no DB or temp files)
-**Plans**: TBD
-**UI hint**: yes
+**Plans**: 3 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Markdown generation engine with YAML frontmatter and domain-grouped browsing log (TDD)
+- [ ] 03-02-PLAN.md — Config reader, atomic file writer, and git auto-commit infrastructure (TDD)
+- [ ] 03-03-PLAN.md — Meta description fetcher and CLI generate command wiring all components
 
 ### Phase 4: Content Processing
 **Goal**: System can fetch and analyze full page content to enable substantive AI summaries
@@ -133,7 +137,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Browser Extension Foundation | 5/5 | Complete    | 2026-04-10 |
 | 2. Data Export Pipeline | 0/3 | Not started | - |
-| 3. Daily Note Generation | 0/? | Not started | - |
+| 3. Daily Note Generation | 0/3 | Not started | - |
 | 4. Content Processing | 0/? | Not started | - |
 | 5. AI Curation | 0/? | Not started | - |
 | 6. Automation & Infrastructure | 0/? | Not started | - |

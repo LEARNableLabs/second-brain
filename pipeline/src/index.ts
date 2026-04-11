@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import { exportCommand } from './commands/export.js';
+import { generateCommand } from './commands/generate.js';
 
 const program = new Command();
 
@@ -13,5 +14,12 @@ program
   .description('Export captures from browser extension to SQLite database')
   .option('--dry-run', 'Show what would be exported without writing to database')
   .action(exportCommand);
+
+program
+  .command('generate')
+  .description('Generate daily notes from captured browsing data')
+  .option('--date <YYYY-MM-DD>', 'Generate note for specific date (defaults to today)')
+  .option('--dry', 'Preview generated markdown without writing files')
+  .action(generateCommand);
 
 program.parse();

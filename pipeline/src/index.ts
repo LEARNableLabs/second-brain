@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import { exportCommand } from './commands/export.js';
 import { generateCommand } from './commands/generate.js';
 import { fetchCommand } from './commands/fetch.js';
+import { curateCommand } from './commands/curate.js';
 
 const program = new Command();
 
@@ -29,5 +30,13 @@ program
   .option('--date <YYYY-MM-DD>', 'Fetch content for specific date (defaults to today)')
   .option('--dry', 'Show what would be fetched without fetching')
   .action(fetchCommand);
+
+program
+  .command('curate')
+  .description('Generate AI-curated summary for daily note')
+  .option('--date <YYYY-MM-DD>', 'Curate for specific date (defaults to today)')
+  .option('--dry', 'Preview curated note without writing files')
+  .option('--eod', 'End-of-day mode: polished summary + clean up ephemeral content')
+  .action(curateCommand);
 
 program.parse();

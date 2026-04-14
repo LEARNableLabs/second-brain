@@ -54,13 +54,20 @@ export function groupByDomain(entries: CaptureRow[]): Record<string, CaptureRow[
 export function generateDailyNote(
   date: string,
   entries: CaptureRow[],
-  descriptions?: Map<string, string>
+  descriptions?: Map<string, string>,
+  aiSummary?: string
 ): string {
   const frontmatter = renderFrontmatter(date, entries);
 
   let note = frontmatter;
-  note += '\n## Highlights\n\n';
-  note += '*AI-curated summary will appear here after Phase 5*\n\n';
+
+  if (aiSummary) {
+    note += '\n' + aiSummary + '\n\n';
+  } else {
+    note += '\n## Highlights\n\n';
+    note += '*AI-curated summary will appear here after Phase 5*\n\n';
+  }
+
   note += '## Browsing Log\n\n';
 
   const grouped = groupByDomain(entries);

@@ -8,6 +8,12 @@ export const ConfigSchema = z.object({
     .refine(p => path.isAbsolute(p), { message: 'outputDir must be an absolute path' })
     .refine(p => !p.includes('..'), { message: 'outputDir must not contain ..' })
     .optional(),
+  llm: z.object({
+    provider: z.enum(['claude', 'ollama']).default('claude'),
+    model: z.string().optional(),
+    apiKey: z.string().optional(),
+    ollamaUrl: z.string().url().optional(),
+  }).optional(),
 });
 
 export type Config = z.infer<typeof ConfigSchema>;

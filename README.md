@@ -15,22 +15,32 @@ Chrome/Comet browser
 [Browser Extension] -- passively captures URLs, titles, domains, timestamps
     |
     v  (native messaging)
-[Export Pipeline]    -- pulls captures into local SQLite database
+[Export]             -- pulls captures into local SQLite database
     |
     v
-[Generate Pipeline] -- creates Obsidian-compatible daily notes from captures
+[Generate]          -- creates Obsidian-compatible daily notes
     |
     v
-~/Documents/Obsidian/second-brain/2026-04-10.md
+[Fetch]             -- extracts full page content (arxiv API, article extraction)
+    |
+    v
+[Curate]            -- AI generates topic clusters, summaries, [[wikilinks]]
+    |
+    v
+~/Documents/Obsidian/second-brain/2026-04-14.md + morning email digest
 ```
 
 **Three components:**
 
 1. **Browser Extension** (`extension/`) -- A WXT-based Chrome/Comet extension that silently tracks page visits with dwell-time filtering (5s minimum), smart blocklist (Gmail, social media, banking filtered out), and a popup UI for pause/quick-block controls.
 
-2. **CLI Pipeline** (`pipeline/`) -- A Node.js CLI (`second-brain`) with two commands:
-   - `second-brain export` -- Pulls captures from the extension into a local SQLite database via Chrome Native Messaging
-   - `second-brain generate` -- Reads captures from the database, fetches meta descriptions from pages, and writes Obsidian-compatible markdown daily notes
+2. **CLI Pipeline** (`pipeline/`) -- A Node.js CLI (`second-brain`) with six commands:
+   - `second-brain export` -- Pulls captures from the extension into SQLite via Chrome Native Messaging
+   - `second-brain generate` -- Writes Obsidian-compatible markdown daily notes from captures
+   - `second-brain fetch` -- Extracts full page content (arxiv API, article extraction, enhanced meta)
+   - `second-brain curate` -- AI-generates summaries with topic clustering and [[wikilinks]]
+   - `second-brain capture-conversation` -- Logs Claude Code conversation topics to daily note
+   - `second-brain email` -- Sends morning email digest via Gmail/gws
 
 3. **Shared Types** (`shared/`) -- Zod schemas and TypeScript types shared between extension and pipeline.
 
@@ -94,30 +104,44 @@ The extension captures pages automatically. It filters out noise (Gmail, Google 
 - Quick-block the current domain
 - See capture stats
 
-### Export captures to database
+### Run the full pipeline manually
 
 ```bash
-npx second-brain export
+npx second-brain export                    # Pull captures from extension
+npx second-brain generate                  # Create daily note
+npx second-brain fetch                     # Extract full page content
+npx second-brain curate                    # AI summary + topic clusters
+npx second-brain curate --eod             # End-of-day polished summary
+npx second-brain email                     # Send yesterday's digest via Gmail
 ```
 
-Pulls captured URLs from the browser extension into `~/.second-brain/data.db`.
+All commands support `--date YYYY-MM-DD` and `--dry` flags.
 
-### Generate daily notes
+### Capture Claude Code conversations
 
 ```bash
-# Generate today's note
-npx second-brain generate
+npx second-brain capture-conversation --topic "RL training loop" --summary "Discussed PPO vs GRPO..."
+```
 
-# Generate for a specific date
-npx second-brain generate --date 2026-04-10
+### Set up hourly automation
 
-# Preview without writing
-npx second-brain generate --dry
+```bash
+./pipeline/launchd/install.sh
+```
+
+This installs a launchd agent that runs the full pipeline every hour. End-of-day summary at 11 PM, morning email digest at 8 AM. Logs at `~/.second-brain/logs/second-brain.log`.
+
+### Configure AI provider
+
+By default, curate uses Claude API (`ANTHROPIC_API_KEY` env var). To use Ollama:
+
+```bash
+echo '{"outputDir": "/path/to/vault", "llm": {"provider": "ollama", "model": "llama3.1"}}' > ~/.second-brain/config.json
 ```
 
 Each daily note includes:
+- AI-curated highlights with topic clusters and [[wikilinks]]
 - YAML frontmatter (date, capture counts, top domains, browsers)
-- Highlights section (placeholder for future AI curation)
 - Browsing log grouped by domain with meta descriptions
 - Source markers (star for manual saves, history suffix for backfills)
 
@@ -133,13 +157,16 @@ second-brain/
     tests/            #   48 tests
   pipeline/           # CLI pipeline (Node.js + TypeScript)
     src/
-      commands/       #   export, generate CLI commands
+      ai/             #   LLM provider abstraction, curation prompt, vault scanner
+      commands/       #   export, generate, fetch, curate, email, capture-conversation
       config/         #   Config reader with Zod validation
-      db/             #   SQLite connection, migrations, operations
+      db/             #   SQLite connection, migrations, operations, content table
+      extractors/     #   Domain-aware content extraction (arxiv, article, general)
       generators/     #   Markdown engine, frontmatter, meta fetcher, atomic writer
       git/            #   Auto-commit to output repo
       messaging/      #   Chrome Native Messaging protocol
-    tests/            #   54 tests
+    launchd/          #   macOS launchd agent for hourly automation
+    tests/            #   78 tests
   shared/             # Shared Zod schemas and types
     src/
     tests/
@@ -166,7 +193,7 @@ Built in phases -- see `.planning/ROADMAP.md` for full details.
 - [x] Phase 1: Browser Extension Foundation
 - [x] Phase 2: Data Export Pipeline
 - [x] Phase 3: Daily Note Generation
-- [ ] Phase 4: Content Processing (full page content fetching)
-- [ ] Phase 5: AI Curation (summaries, topic clustering, wikilinks)
-- [ ] Phase 6: Automation (hourly launchd scheduling)
-- [ ] Phase 7: Conversation Capture & Email Delivery
+- [x] Phase 4: Content Processing (full page content fetching)
+- [x] Phase 5: AI Curation (summaries, topic clustering, wikilinks)
+- [x] Phase 6: Automation (hourly launchd scheduling)
+- [x] Phase 7: Conversation Capture & Email Delivery

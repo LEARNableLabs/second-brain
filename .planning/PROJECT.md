@@ -23,14 +23,14 @@ Every page you visit is captured and intelligently surfaced — you never lose t
 
 ### Active
 
-- [ ] AI fetches and processes full page content for deep analysis (arxiv papers, blog posts, articles)
-- [ ] AI generates a curated summary section at the top of the daily page (rolling, regenerated each run)
-- [ ] AI clusters related items by topic (e.g. "you looked at 4 RL papers today")
-- [ ] Curated items auto-link to existing vault notes via [[wikilinks]] when topics match
-- [ ] LLM provider is swappable (Claude API default, local LLM option)
-- [ ] Processing runs hourly via launchd, with end-of-day final consolidation pass
-- [ ] Morning email digest with highlights sent via Gmail
-- [ ] Claude Code skill to capture AI conversation topics/summaries to daily page
+- [x] AI fetches and processes full page content for deep analysis (arxiv papers, blog posts, articles) — Validated in Phase 4
+- [x] AI generates a curated summary section at the top of the daily page (rolling, regenerated each run) — Validated in Phase 5
+- [x] AI clusters related items by topic (e.g. "you looked at 4 RL papers today") — Validated in Phase 5
+- [x] Curated items auto-link to existing vault notes via [[wikilinks]] when topics match — Validated in Phase 5
+- [x] LLM provider is swappable (Claude API default, local LLM option) — Validated in Phase 5
+- [x] Processing runs hourly via launchd, with end-of-day final consolidation pass — Validated in Phase 6
+- [x] Morning email digest with highlights sent via Gmail — Validated in Phase 7
+- [x] Claude Code skill to capture AI conversation topics/summaries to daily page — Validated in Phase 7
 
 ### Out of Scope
 
@@ -91,4 +91,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-10 after Phase 3 completion*
+*Last updated: 2026-04-14 after Phase 7 completion — all v1.0 phases complete*

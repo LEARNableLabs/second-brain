@@ -17,51 +17,51 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Daily Note
 
-- [ ] **NOTE-01**: System creates one Obsidian-compatible .md file per day in the vault
-- [ ] **NOTE-02**: Daily note contains a raw chronological timeline log with timestamps at the bottom
-- [ ] **NOTE-03**: New items are appended incrementally each processing cycle (hourly)
-- [ ] **NOTE-04**: User can trigger daily note generation on-demand via CLI command
+- [x] **NOTE-01**: System creates one Obsidian-compatible .md file per day in the vault
+- [x] **NOTE-02**: Daily note contains a raw chronological timeline log with timestamps at the bottom
+- [x] **NOTE-03**: New items are appended incrementally each processing cycle (hourly)
+- [x] **NOTE-04**: User can trigger daily note generation on-demand via CLI command
 
 ### Content Processing
 
-- [ ] **PROC-01**: System fetches full page content at processing time for captured URLs (articles, papers, blog posts)
-- [ ] **PROC-02**: System uses domain-aware extraction (e.g. arxiv API for papers, article extractors for blogs, OpenGraph for general pages)
-- [ ] **PROC-03**: Fetched content is used for AI analysis then discarded — only metadata + AI summaries stored
-- [ ] **PROC-04**: Processing runs incrementally every hour via launchd, handling only new captures since last run
+- [x] **PROC-01**: System fetches full page content at processing time for captured URLs (articles, papers, blog posts)
+- [x] **PROC-02**: System uses domain-aware extraction (e.g. arxiv API for papers, article extractors for blogs, OpenGraph for general pages)
+- [x] **PROC-03**: Fetched content is used for AI analysis then discarded — only metadata + AI summaries stored
+- [x] **PROC-04**: Processing runs incrementally every hour via launchd, handling only new captures since last run
 
 ### AI Curation
 
-- [ ] **CURE-01**: AI generates a curated executive summary at the top of the daily note
-- [ ] **CURE-02**: Executive summary is regenerated each hourly cycle with all data so far (append + live summary pattern)
-- [ ] **CURE-03**: AI clusters related items by topic (e.g. "you looked at 4 RL papers today")
-- [ ] **CURE-04**: AI summaries are substantive — based on full page content, not just titles
-- [ ] **CURE-05**: End-of-day final consolidation pass produces polished summary for the complete day
-- [ ] **CURE-06**: Curated items auto-link to existing vault notes via [[wikilinks]] when topics match
+- [x] **CURE-01**: AI generates a curated executive summary at the top of the daily note
+- [x] **CURE-02**: Executive summary is regenerated each hourly cycle with all data so far (append + live summary pattern)
+- [x] **CURE-03**: AI clusters related items by topic (e.g. "you looked at 4 RL papers today")
+- [x] **CURE-04**: AI summaries are substantive — based on full page content, not just titles
+- [x] **CURE-05**: End-of-day final consolidation pass produces polished summary for the complete day
+- [x] **CURE-06**: Curated items auto-link to existing vault notes via [[wikilinks]] when topics match
 
 ### Storage
 
-- [ ] **STOR-01**: Local SQLite database serves as processing layer — source of truth for all captured data
-- [ ] **STOR-02**: Database tracks processing status per URL (captured → content fetched → curated → written to vault)
-- [ ] **STOR-03**: Database deduplicates URLs visited multiple times (one entry per unique URL per day)
-- [ ] **STOR-04**: Daily notes can be regenerated from the database if vault files are corrupted or deleted
-- [ ] **STOR-05**: Output location is configurable — user chooses between inside Obsidian vault (default) or standalone folder
-- [ ] **STOR-06**: Output folder is git-tracked — each processing cycle auto-commits the final .md files (only markdown, no DB or temp files)
+- [x] **STOR-01**: Local SQLite database serves as processing layer — source of truth for all captured data
+- [x] **STOR-02**: Database tracks processing status per URL (captured → content fetched → curated → written to vault)
+- [x] **STOR-03**: Database deduplicates URLs visited multiple times (one entry per unique URL per day)
+- [x] **STOR-04**: Daily notes can be regenerated from the database if vault files are corrupted or deleted
+- [x] **STOR-05**: Output location is configurable — user chooses between inside Obsidian vault (default) or standalone folder
+- [x] **STOR-06**: Output folder is git-tracked — each processing cycle auto-commits the final .md files (only markdown, no DB or temp files)
 
 ### Infrastructure
 
-- [ ] **INFR-01**: LLM provider is swappable between Claude API (default) and local Ollama
-- [ ] **INFR-02**: Hourly processing scheduled via macOS launchd (handles sleep/wake correctly)
-- [ ] **INFR-03**: All output is valid Obsidian Markdown with proper [[wikilinks]] and frontmatter
+- [x] **INFR-01**: LLM provider is swappable between Claude API (default) and local Ollama
+- [x] **INFR-02**: Hourly processing scheduled via macOS launchd (handles sleep/wake correctly)
+- [x] **INFR-03**: All output is valid Obsidian Markdown with proper [[wikilinks]] and frontmatter
 
 ### Delivery
 
-- [ ] **DELV-01**: Morning email digest with highlights sent via Gmail/gws CLI
-- [ ] **DELV-02**: Email contains the curated summary (same content as daily note top section)
+- [x] **DELV-01**: Morning email digest with highlights sent via Gmail/gws CLI
+- [x] **DELV-02**: Email contains the curated summary (same content as daily note top section)
 
 ### AI Conversation Capture
 
-- [ ] **CONV-01**: Claude Code skill captures conversation topics and summaries to the daily resource page
-- [ ] **CONV-02**: Captured AI conversation data is included in the daily note alongside browsing data
+- [x] **CONV-01**: Claude Code skill captures conversation topics and summaries to the daily resource page
+- [x] **CONV-02**: Captured AI conversation data is included in the daily note alongside browsing data
 
 ## v2 Requirements
 
@@ -110,33 +110,33 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CAPT-03 | Phase 1 | Complete |
 | CAPT-04 | Phase 1 | Complete |
 | CAPT-05 | Phase 1 | Complete |
-| NOTE-01 | Phase 3 | Pending |
-| NOTE-02 | Phase 3 | Pending |
-| NOTE-03 | Phase 3 | Pending |
-| NOTE-04 | Phase 2 | Pending |
-| PROC-01 | Phase 4 | Pending |
-| PROC-02 | Phase 4 | Pending |
-| PROC-03 | Phase 4 | Pending |
-| PROC-04 | Phase 4 | Pending |
-| CURE-01 | Phase 5 | Pending |
-| CURE-02 | Phase 5 | Pending |
-| CURE-03 | Phase 5 | Pending |
-| CURE-04 | Phase 5 | Pending |
-| CURE-05 | Phase 5 | Pending |
-| CURE-06 | Phase 5 | Pending |
-| STOR-01 | Phase 2 | Pending |
-| STOR-02 | Phase 2 | Pending |
-| STOR-03 | Phase 2 | Pending |
-| STOR-04 | Phase 3 | Pending |
-| STOR-05 | Phase 3 | Pending |
-| STOR-06 | Phase 3 | Pending |
-| INFR-01 | Phase 5 | Pending |
-| INFR-02 | Phase 6 | Pending |
-| INFR-03 | Phase 6 | Pending |
-| DELV-01 | Phase 7 | Pending |
-| DELV-02 | Phase 7 | Pending |
-| CONV-01 | Phase 7 | Pending |
-| CONV-02 | Phase 7 | Pending |
+| NOTE-01 | Phase 3 | Complete |
+| NOTE-02 | Phase 3 | Complete |
+| NOTE-03 | Phase 3 | Complete |
+| NOTE-04 | Phase 2 | Complete |
+| PROC-01 | Phase 4 | Complete |
+| PROC-02 | Phase 4 | Complete |
+| PROC-03 | Phase 4 | Complete |
+| PROC-04 | Phase 4 | Complete |
+| CURE-01 | Phase 5 | Complete |
+| CURE-02 | Phase 5 | Complete |
+| CURE-03 | Phase 5 | Complete |
+| CURE-04 | Phase 5 | Complete |
+| CURE-05 | Phase 5 | Complete |
+| CURE-06 | Phase 5 | Complete |
+| STOR-01 | Phase 2 | Complete |
+| STOR-02 | Phase 2 | Complete |
+| STOR-03 | Phase 2 | Complete |
+| STOR-04 | Phase 3 | Complete |
+| STOR-05 | Phase 3 | Complete |
+| STOR-06 | Phase 3 | Complete |
+| INFR-01 | Phase 5 | Complete |
+| INFR-02 | Phase 6 | Complete |
+| INFR-03 | Phase 6 | Complete |
+| DELV-01 | Phase 7 | Complete |
+| DELV-02 | Phase 7 | Complete |
+| CONV-01 | Phase 7 | Complete |
+| CONV-02 | Phase 7 | Complete |
 
 **Coverage:**
 - v1 requirements: 32 total
@@ -145,4 +145,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-09*
-*Last updated: 2026-04-09 after roadmap creation*
+*Last updated: 2026-04-14 — all v1 requirements complete*

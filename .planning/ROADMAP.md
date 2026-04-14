@@ -3,17 +3,17 @@
 **Project:** Automated browsing capture and AI curation system for Obsidian vault
 **Core Value:** Every page you visit is captured and intelligently surfaced — you never lose track of what caught your attention
 **Granularity:** Standard (5-8 phases, 3-5 plans each)
-**Status:** Active
+**Status:** Complete
 
 ## Phases
 
 - [x] **Phase 1: Browser Extension Foundation** - Passive capture of URLs, titles, and metadata from Chrome and Comet (completed 2026-04-10)
-- [ ] **Phase 2: Data Export Pipeline** - Bridge extension storage to processing layer with versioned schema
-- [ ] **Phase 3: Daily Note Generation** - Create Obsidian-compatible markdown files with chronological timeline
-- [ ] **Phase 4: Content Processing** - Fetch and process full page content for AI analysis
-- [ ] **Phase 5: AI Curation** - Generate intelligent summaries with topic clustering and wikilink matching
-- [ ] **Phase 6: Automation & Infrastructure** - Hourly processing with launchd scheduling and swappable LLM providers
-- [ ] **Phase 7: Conversation Capture & Delivery** - Claude Code skill for AI conversations and email digest delivery
+- [x] **Phase 2: Data Export Pipeline** - Bridge extension storage to processing layer with versioned schema (completed 2026-04-10)
+- [x] **Phase 3: Daily Note Generation** - Create Obsidian-compatible markdown files with chronological timeline (completed 2026-04-10)
+- [x] **Phase 4: Content Processing** - Fetch and process full page content for AI analysis (completed 2026-04-14)
+- [x] **Phase 5: AI Curation** - Generate intelligent summaries with topic clustering and wikilink matching (completed 2026-04-14)
+- [x] **Phase 6: Automation & Infrastructure** - Hourly processing with launchd scheduling and swappable LLM providers (completed 2026-04-14)
+- [x] **Phase 7: Conversation Capture & Delivery** - Claude Code skill for AI conversations and email digest delivery (completed 2026-04-14)
 
 ## Phase Details
 
@@ -93,7 +93,7 @@ Plans:
   2. User visits a blog post and the system extracts article text (not just title/description)
   3. User can verify that vault storage stays small over time (full content is not stored, only metadata)
   4. Processing runs and only handles URLs captured since the last run (incremental processing works)
-**Plans**: TBD
+**Plans**: Implemented directly (2026-04-14)
 
 ### Phase 5: AI Curation
 **Goal**: Users receive intelligent summaries with topic clustering and automatic links to existing vault notes
@@ -107,7 +107,7 @@ Plans:
   5. End-of-day summary is more polished than hourly incremental summaries (final consolidation pass works)
   6. Summary includes [[wikilinks]] to existing vault notes when AI detects matching topics
   7. User can switch between Claude API and local Ollama in config file without code changes
-**Plans**: TBD
+**Plans**: Implemented directly (2026-04-14)
 
 ### Phase 6: Automation & Infrastructure
 **Goal**: System runs automatically every hour without manual triggers and handles sleep/wake cycles correctly
@@ -118,7 +118,7 @@ Plans:
   2. User does nothing and processing runs at the top of every hour without manual intervention
   3. Processing logs are written to a predictable location so user can debug failures
   4. All generated markdown files are valid Obsidian format with proper [[wikilinks]] and frontmatter
-**Plans**: TBD
+**Plans**: Implemented directly (2026-04-14)
 
 ### Phase 7: Conversation Capture & Delivery
 **Goal**: Users can capture AI conversation topics and receive morning email digests without opening Obsidian
@@ -129,27 +129,26 @@ Plans:
   2. Captured AI conversation data is formatted consistently with browsing data (same timeline structure)
   3. User wakes up in the morning and has received an email with yesterday's highlights
   4. Email contains the same curated summary as the top of the daily note
-**Plans**: TBD
+**Plans**: Implemented directly (2026-04-14)
 
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Browser Extension Foundation | 5/5 | Complete    | 2026-04-10 |
-| 2. Data Export Pipeline | 0/3 | Not started | - |
-| 3. Daily Note Generation | 0/3 | Not started | - |
-| 4. Content Processing | 0/? | Not started | - |
-| 5. AI Curation | 0/? | Not started | - |
-| 6. Automation & Infrastructure | 0/? | Not started | - |
-| 7. Conversation Capture & Delivery | 0/? | Not started | - |
+| 1. Browser Extension Foundation | 5/5 | Complete | 2026-04-10 |
+| 2. Data Export Pipeline | 3/3 | Complete | 2026-04-10 |
+| 3. Daily Note Generation | 3/3 | Complete | 2026-04-10 |
+| 4. Content Processing | direct | Complete | 2026-04-14 |
+| 5. AI Curation | direct | Complete | 2026-04-14 |
+| 6. Automation & Infrastructure | direct | Complete | 2026-04-14 |
+| 7. Conversation Capture & Delivery | direct | Complete | 2026-04-14 |
 
 ## Milestones
 
-Current milestone: **v1.0 - Initial Release**
+Milestone: **v1.0 - Initial Release** -- COMPLETE (2026-04-14)
 - All phases 1-7 complete
-- 100% requirement coverage validated
 - System runs hourly with end-of-day consolidation
 
 ---
 *Roadmap created: 2026-04-09*
-*Last updated: 2026-04-10*
+*Last updated: 2026-04-14*

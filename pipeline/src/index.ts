@@ -3,6 +3,8 @@ import { exportCommand } from './commands/export.js';
 import { generateCommand } from './commands/generate.js';
 import { fetchCommand } from './commands/fetch.js';
 import { curateCommand } from './commands/curate.js';
+import { captureConversationCommand } from './commands/capture-conversation.js';
+import { emailCommand } from './commands/email.js';
 
 const program = new Command();
 
@@ -38,5 +40,18 @@ program
   .option('--dry', 'Preview curated note without writing files')
   .option('--eod', 'End-of-day mode: polished summary + clean up ephemeral content')
   .action(curateCommand);
+
+program
+  .command('capture-conversation')
+  .description('Capture an AI conversation topic to the daily note')
+  .requiredOption('--topic <topic>', 'Conversation topic')
+  .option('--summary <summary>', 'Brief summary of the conversation')
+  .action(captureConversationCommand);
+
+program
+  .command('email')
+  .description('Send morning email digest of yesterday\'s highlights')
+  .option('--date <YYYY-MM-DD>', 'Send digest for specific date (defaults to yesterday)')
+  .action(emailCommand);
 
 program.parse();

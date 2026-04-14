@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/second_brain_logo.png" alt="Second Brain logo" width="200">
+</p>
+
 # Second Brain
 
 An automated knowledge capture system for macOS. It passively logs everything you browse during the day, then generates daily highlight pages in your Obsidian vault. Your browsing history becomes your external memory.

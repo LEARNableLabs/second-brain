@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import { exportCommand } from './commands/export.js';
 import { generateCommand } from './commands/generate.js';
+import { fetchCommand } from './commands/fetch.js';
 
 const program = new Command();
 
@@ -21,5 +22,12 @@ program
   .option('--date <YYYY-MM-DD>', 'Generate note for specific date (defaults to today)')
   .option('--dry', 'Preview generated markdown without writing files')
   .action(generateCommand);
+
+program
+  .command('fetch')
+  .description('Fetch full page content for captured URLs')
+  .option('--date <YYYY-MM-DD>', 'Fetch content for specific date (defaults to today)')
+  .option('--dry', 'Show what would be fetched without fetching')
+  .action(fetchCommand);
 
 program.parse();

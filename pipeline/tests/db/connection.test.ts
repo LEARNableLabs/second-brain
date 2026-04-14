@@ -27,12 +27,12 @@ describe('Database Connection', () => {
     closeDatabase(db);
   });
 
-  it('Test 3: migrate() applies 001_initial.sql and sets user_version = 1', () => {
+  it('Test 3: migrate() applies all migrations and sets user_version', () => {
     const db = getDatabase();
     const result = migrate(db);
-    expect(result.applied).toBe(1);
-    expect(result.current).toBe(1);
-    expect(getSchemaVersion(db)).toBe(1);
+    expect(result.applied).toBe(2);
+    expect(result.current).toBe(2);
+    expect(getSchemaVersion(db)).toBe(2);
     closeDatabase(db);
   });
 
@@ -41,7 +41,7 @@ describe('Database Connection', () => {
     migrate(db);
     const secondRun = migrate(db);
     expect(secondRun.applied).toBe(0);
-    expect(secondRun.current).toBe(1);
+    expect(secondRun.current).toBe(2);
     closeDatabase(db);
   });
 

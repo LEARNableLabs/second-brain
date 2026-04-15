@@ -133,10 +133,14 @@ This installs a launchd agent that runs the full pipeline every hour. End-of-day
 
 ### Configure AI provider
 
-By default, curate uses Claude API (`ANTHROPIC_API_KEY` env var). To use Ollama:
+By default, curate uses `claude -p` (Claude Code CLI) — no API key needed if you have Claude Code installed. Alternative providers:
 
 ```bash
-echo '{"outputDir": "/path/to/vault", "llm": {"provider": "ollama", "model": "llama3.1"}}' > ~/.second-brain/config.json
+# Use Ollama (local, fully private)
+echo '{"llm": {"provider": "ollama", "model": "llama3.1"}}' > ~/.second-brain/config.json
+
+# Use Claude API directly (requires ANTHROPIC_API_KEY env var)
+echo '{"llm": {"provider": "claude"}}' > ~/.second-brain/config.json
 ```
 
 Each daily note includes:

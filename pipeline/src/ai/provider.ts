@@ -3,7 +3,7 @@ export interface LLMProvider {
 }
 
 export interface LLMConfig {
-  provider: 'claude' | 'ollama';
+  provider: 'claude' | 'claude-code' | 'ollama';
   model?: string;
   apiKey?: string;
   ollamaUrl?: string;
@@ -13,6 +13,8 @@ export function createProvider(config: LLMConfig): LLMProvider {
   switch (config.provider) {
     case 'claude':
       return createClaudeProvider(config);
+    case 'claude-code':
+      return createClaudeCodeProvider(config);
     case 'ollama':
       return createOllamaProvider(config);
     default:
@@ -34,6 +36,27 @@ function createClaudeProvider(config: LLMConfig): LLMProvider {
       const block = response.content[0];
       if (block.type !== 'text') throw new Error('Unexpected response type');
       return block.text;
+    },
+  };
+}
+
+function createClaudeCodeProvider(config: LLMConfig): LLMProvider {
+  return {
+    async complete(prompt: string): Promise<string> {
+      const { execFile } = await import('child_process');
+      const { promisify } = await import('util');
+      const execFileAsync = promisify(execFile);
+
+      const args = ['-p', prompt, '--output-format', 'text'];
+      if (config.model) {
+        args.push('--model', config.model);
+      }
+
+      const { stdout } = await execFileAsync('claude', args, {
+        timeout: 120_000,
+        maxBuffer: 10 * 1024 * 1024,
+      });
+      return stdout.trim();
     },
   };
 }

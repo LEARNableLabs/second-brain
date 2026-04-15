@@ -9,7 +9,7 @@ export const ConfigSchema = z.object({
     .refine(p => !p.includes('..'), { message: 'outputDir must not contain ..' })
     .optional(),
   llm: z.object({
-    provider: z.enum(['claude', 'ollama']).default('claude'),
+    provider: z.enum(['claude', 'claude-code', 'ollama']).default('claude-code'),
     model: z.string().optional(),
     apiKey: z.string().optional(),
     ollamaUrl: z.string().url().optional(),

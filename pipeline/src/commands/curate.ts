@@ -26,8 +26,8 @@ export async function curateCommand(options: CurateOptions = {}): Promise<void> 
   const config = await loadConfig();
   const outputDir = getOutputDir(config);
 
-  const llmConfig = config.llm || { provider: 'claude' as const };
-  // Allow ANTHROPIC_API_KEY env var as fallback
+  const llmConfig = config.llm || { provider: 'claude-code' as const };
+  // Allow ANTHROPIC_API_KEY env var as fallback for direct API usage
   if (llmConfig.provider === 'claude' && !llmConfig.apiKey) {
     llmConfig.apiKey = process.env.ANTHROPIC_API_KEY;
   }

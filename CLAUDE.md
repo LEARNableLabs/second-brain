@@ -63,7 +63,7 @@ An automated knowledge capture system that passively logs everything you browse 
 - Browser: Obsidian renders Markdown locally
 - No Node.js application code
 ## Storage & Persistence
-- Filesystem-based vault at `/Users/ggiannon/Documents/gcg/second-brain/`
+- Filesystem-based vault at `./`
 - Markdown files committed to version control (no .gitignore detected)
 - Google Workspace services (via `gws` CLI)
 - Obsidian Sync (if enabled - not visible in config)
@@ -94,7 +94,7 @@ Conventions not yet established. Will populate as patterns emerge during develop
 - Depends on: Obsidian application, .obsidian configuration
 - Used by: End user for knowledge organization and retrieval
 - Purpose: Store and organize project notes and documentation
-- Location: `/Users/ggiannon/Documents/gcg/second-brain/`
+- Location: `./`
 - Contains: Markdown files (.md), wikilinks, tags
 - Depends on: Filesystem, Obsidian syntax conventions
 - Used by: Presentation layer (Obsidian), external CLI tools
@@ -116,7 +116,7 @@ Conventions not yet established. Will populate as patterns emerge during develop
 - Graph state: `.obsidian/graph.json` (node positions, link visualization)
 ## Key Abstractions
 - Purpose: Container for all notes and configuration
-- Examples: `/Users/ggiannon/Documents/gcg/second-brain/`
+- Examples: `./`
 - Pattern: Local filesystem directory following Obsidian conventions
 - Purpose: Create semantic connections between notes
 - Examples: `[[Resources]]`, `[[project-name]]`
@@ -137,7 +137,7 @@ Conventions not yet established. Will populate as patterns emerge during develop
 - Location: Terminal invocations
 - Triggers: User types `gws`, `npx get-shit-done-cc@latest`, etc.
 - Responsibilities: Authenticate, execute remote operations, return results
-- Location: `*.md` files in `/Users/ggiannon/Documents/gcg/second-brain/`
+- Location: `*.md` files in `./`
 - Triggers: Obsidian indexes files on startup and watches for changes
 - Responsibilities: Store content, maintain wikilink structure
 ## Error Handling

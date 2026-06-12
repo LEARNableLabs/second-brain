@@ -24,3 +24,9 @@ coverage/
 *.db
 *.db-shm
 *.db-wal
+
+# Claude Code (local settings)
+.claude/
+
+# GSD planning artifacts (dev-only)
+.planning/

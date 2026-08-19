@@ -1,113 +1,113 @@
-# Code Review — Vitest Workspace Isolation & TypeScript Strict Mode Fixes
+# Code Review — H3: Pino Structured Logging
 
-**Commit:** `5a875f7 fix: vitest workspace isolation and TypeScript strict mode errors`
-**Hypothesis:** H1 + H2 — Fix vitest workspace isolation and fix TypeScript strict mode errors
-**Files changed (source):** 9 files (vitest.config.ts, extension/entrypoints/background.ts, extension/entrypoints/wxt-shims.d.ts, extension/package.json, extension/tsconfig.json, extension/tests/background.test.ts, extension/tests/manual-capture.test.ts, pipeline/src/types/modules.d.ts, pipeline/tsconfig.json)
+**Reviewer:** code_reviewer agent
+**Commit:** 484612a `feat: add Pino structured logging for observability`
+**Date:** 2026-08-19
 
 ---
 
 ## 7-Category Checklist
 
-### 1. Correctness — PASS (with important note)
+### 1. Correctness — PASS
 
-**Vitest workspace config (vitest.config.ts):**
-- Correctly uses `test.projects` to reference workspace directories `['extension', 'pipeline', 'shared']`. Each workspace has its own `vitest.config.ts` (verified present). This resolves the root cause: `npx vitest run` from root will now isolate each workspace with its own config/mocks.
+Pino is used correctly throughout:
+- **Root logger** (`shared/src/logger.ts:3-6`): Proper singleton with `pino.stdTimeFunctions.isoTime` and `LOG_LEVEL` env var. JSON output by default (Pino's default).
+- **Child loggers** (`shared/src/logger.ts:8-13`): Correct use of `rootLogger.child()` for module and request context. `traceContext` field enables correlation.
+- **Error serialization**: All error catches use `{ err }` key convention (`pipeline/src/commands/export.ts:87`, `generate.ts:67`, `meta-fetcher.ts:43`), which Pino's default `err` serializer handles correctly — stack traces are preserved as structured data.
+- **Browser logger** (`extension/components/logger.ts`): Correctly avoids importing Pino in the browser extension context. Uses console API with matching interface shape.
+- **Request ID generation**: `crypto.randomUUID()` in `export.ts:23` and `generate.ts:19` — correct, no collision risk.
 
-**Type migrations (background.ts):**
-- `chrome.webNavigation.WebNavigationFramedCallbackDetails` → `WebNavigation.OnCompletedDetailsType`: Correct. The webextension-polyfill type `OnCompletedDetailsType` has `tabId`, `url`, `frameId`, `timeStamp` — all fields used by the handler. Does NOT have `processId`, which was correctly removed from test fixtures.
-- `chrome.tabs.TabActiveInfo` → `Tabs.OnActivatedActiveInfoType`: Correct. Has `tabId` and optional `previousTabId`.
-- `chrome.tabs.TabRemoveInfo` → `Tabs.OnRemovedRemoveInfoType`: Correct. Param correctly renamed to `_removeInfo` (unused).
-- `chrome.runtime.InstalledDetails` → `Runtime.OnInstalledDetailsType`: Correct. Test fixtures updated to add required `temporary: false` field.
-- `chrome.contextMenus.OnClickData` → `Menus.OnClickData`: Correct.
-- `chrome.tabs.Tab` → `Tabs.Tab`: Correct.
-
-**onMessage handler refactor (background.ts:285-294):**
-- Changed from callback-style (`sendResponse` + `return true`) to async pattern. This is the correct pattern for `webextension-polyfill`, which supports `OnMessageListenerAsync` — an async listener returning a Promise. When the message doesn't match, the async function returns `Promise<undefined>`, which webextension-polyfill treats as "no response" (does not interfere with other listeners).
-- The `(message as { action?: string }).action` cast is a reasonable narrow-scope assertion for message discrimination.
-
-**pipeline/tsconfig.json — rootDir removal (IMPORTANT):**
-- The `rootDir: "./src"` was replaced with `types: ["vitest/globals"]` on the same line. These are **two independent config options**. The `types` addition is correct and necessary for vitest globals. However, removing `rootDir` changes `tsc` build output structure: `src/index.ts` would compile to `dist/src/index.ts` instead of `dist/index.ts`. Impact is **mitigated** because the project uses `tsx` at runtime (`bin/second-brain.js` imports `../src/index.ts` directly), so the compiled output is not consumed. But the `build` script (`"build": "tsc"`) will produce different output. Both options should coexist.
+**One minor correctness issue:**
+- `pipeline/src/config/reader.ts:39`: The `else` branch logs `'no config file found, using defaults'` for ALL non-ZodError exceptions. This includes `JSON.parse` errors (corrupt config file), which would be misleadingly logged as "no config file found." Previous behavior silently swallowed non-Zod errors; new behavior logs them but with the wrong message. **Severity: minor** — behavior (returning defaults) is unchanged, only the log message is misleading.
 
 ### 2. Security — PASS
 
-- No hardcoded secrets, API keys, or credentials introduced.
-- No injection vectors (SQL, XSS, command injection, path traversal).
-- No unsafe deserialization.
-- Type-only changes don't affect runtime security posture.
-- `@types/chrome` is a dev-only dependency — no production surface.
+- **No secrets in logs**: Reviewed all `logger.*()` call sites. Logged fields are operational metadata: `configPath`, `dbPath`, `dataDir`, `url`, `date`, `status`, `count`, `requestId`, `action`. No API keys, passwords, or tokens are logged.
+- **Config apiKey field** (`reader.ts:17`): The `apiKey` field exists in `ConfigSchema` but is never logged — `loadConfig()` only logs `configPath` (line 27) and Zod validation errors (line 37). Zod errors contain schema paths and messages, not input values. Safe.
+- **URL logging** (`operations.ts:49`, `meta-fetcher.ts:12,20,40,43`): URLs from browsing history are logged. This is intentional for observability of a browsing-capture tool. URLs go to local structured logs (stdout/file), not external services.
+- **Home directory in paths**: `configPath` and `dbPath` include `os.homedir()` — standard for local CLI tools, not a security concern.
+- **No injection vectors**: Log messages are structured (Pino JSON), not string-interpolated. No user input reaches log format strings.
 
 ### 3. Edge Cases — PASS
 
-- Test fixture `processId` removal: Correct — `OnCompletedDetailsType` does not have `processId`. Test objects now match the actual type shape.
-- `temporary: false` added to `OnInstalledDetailsType` test fixtures: Required field in the webextension-polyfill type definition.
-- Mock function type annotations tightened: `detectGap` returns `null as number | null`, `backfillHistory` accepts `_start?: number` — prevents implicit `any` under strict mode.
-- The `as Menus.OnClickData` and `as Tabs.Tab` casts in test fixtures are appropriate — test data is partial by nature, and `as` casts are the standard test pattern.
+- **Empty inputs**: `saveCaptures` (`operations.ts:20`) correctly logs `{ count: entries.length }` — works for empty arrays (count=0).
+- **Missing config**: `reader.ts` returns empty defaults on any error — unchanged behavior.
+- **Unknown message actions**: `host.ts:38` logs `{ action: (msg as any).action }` for unknown actions — safe, doesn't crash.
+- **Meta-fetch timeouts**: `meta-fetcher.ts:40` properly distinguishes timeout errors from other failures.
+- **Browser logger args**: `extension/components/logger.ts:18-23` handles both `(string)` and `(object, string?)` signatures correctly. `args[1] ?? ''` fallback is safe for single-arg calls.
 
-### 4. Missing Tests — PASS
+### 4. Missing Tests — FAIL (important)
 
-- This commit is a fix (type corrections + workspace config), not a feature addition. No new public functions or code paths were introduced.
-- Existing tests were updated to compile under strict mode — the test behavior and coverage remain identical.
-- The vitest workspace config is tested implicitly by whether `npx vitest run` from root succeeds.
+- **`shared/src/logger.ts`**: New public module with 2 exported functions (`createModuleLogger`, `createRequestLogger`). **No test coverage.** Should verify: child logger creation, module/requestId fields in output, LOG_LEVEL env var behavior.
+- **`extension/components/logger.ts`**: New public module with 1 exported function (`createModuleLogger`). **No test coverage.** Should verify: prefix formatting, all 4 log levels, both call signatures (string and object+message).
+- **Instrumented files**: The logging additions in existing files are lightweight and don't change business logic, so the existing 166 tests still cover the core behavior. The lack of dedicated logger tests is the main gap.
 
 ### 5. Style & Consistency — PASS
 
-- Import style: `import type { ... } from 'webextension-polyfill'` at line 2 — type-only import, consistent with existing type imports in the file.
-- Naming: `_removeInfo` prefix for unused parameter follows TypeScript convention.
-- No dead code or unused imports introduced.
-- `wxt-shims.d.ts` is a standard ambient declaration for the WXT framework's `defineBackground` function — minimal and correct.
-- `pipeline/src/types/modules.d.ts` uses standard `declare module` for untyped dependencies — correct pattern.
+- **Naming convention**: Consistent `createModuleLogger(name)` pattern across all files. Module names follow `namespace:module` format (`'db:connection'`, `'cmd:export'`, `'generators:markdown'`) — clear and systematic.
+- **Import organization**: Logger imports grouped with other imports, no unusual ordering.
+- **No dead code**: All logger instances are used. The `console.error` statements in `host.ts` were properly replaced (not left as duplicates).
+- **Module-level vs request-level**: Correct separation — `createModuleLogger` for stateless modules (db, config, generators), `createRequestLogger` for CLI commands that need request correlation. Consistent pattern.
+- **Browser logger API shape**: Matches Pino's call signature (`(obj, msg?)` and `(msg)`) — consumers can switch between environments without API changes. Good design.
 
-### 6. Scope Compliance — PASS (with note)
+### 6. Scope Compliance — PASS (with deviation noted)
 
-**Spec fidelity: 4/4 criteria met**
+**Hypothesis acceptance criteria:**
+1. ✅ Install `pino` (production) and `pino-pretty` (dev) — done in `pipeline/package.json` and `shared/package.json`
+2. ✅ Create `shared/src/logger.ts` with `createModuleLogger(name)` — done
+3. ⚠️ Instrument 10 highest-priority files — **10 files instrumented, but not the same 10**
+4. ✅ Log at boundaries (entry, error, decisions) — done consistently
+5. ✅ Request ID tracing in CLI commands — done in `export.ts` and `generate.ts`
 
-| Criterion | Status |
-|---|---|
-| Create vitest workspace config for monorepo test isolation | ✅ `vitest.config.ts` created with 3 workspace projects |
-| Fix extension TypeScript errors (chrome namespace → webextension-polyfill types) | ✅ All `chrome.*` types replaced with proper polyfill types, `@types/chrome` added |
-| Fix pipeline TypeScript errors (module declarations, types config) | ✅ `modules.d.ts` added, `types: ["vitest/globals"]` configured |
-| Fix test type errors to compile under strict mode | ✅ Test fixtures updated (processId removed, temporary added, mock types annotated) |
+**Scope deviation detail:**
+- **Instrumented (from hypothesis list):** `operations.ts`, `connection.ts`, `storage.ts`, `history-backfill.ts` (4/10)
+- **Not instrumented (from hypothesis list):** `ai/provider.ts`, `ai/curate.ts`, `ai/vault-scanner.ts`, `db/content-operations.ts`, `db/migrate.ts`, `generators/writer.ts` (6 files skipped)
+- **Instrumented (not in hypothesis):** `commands/export.ts`, `commands/generate.ts`, `config/reader.ts`, `generators/markdown.ts`, `generators/meta-fetcher.ts`, `messaging/host.ts` (6 extra files)
 
-**Scope note:** The `onMessage` handler refactor (callback → async) goes slightly beyond "fix TypeScript strict mode errors" — it's a functional behavior change, not just a type fix. However, it was likely necessary to satisfy strict typing since the old callback pattern with `sendResponse` doesn't type cleanly under webextension-polyfill. This is justified.
+The builder instrumented 10 different files, achieving the target count and the observability score goal (0.176 → 0.597). The substituted files are reasonable — CLI entry points and generators are arguably higher-priority for observability than AI modules that are not yet actively used. **Not a critical deviation** — the spirit of the hypothesis was met.
 
-**Scope note:** The `rootDir` removal in `pipeline/tsconfig.json` appears unintentional — the line was replaced rather than having `types` added alongside it. This is minor scope deviation.
+**No unrelated changes detected.** The `@types/chrome` devDependency addition in `extension/package.json` is from H2 (TypeScript fixes), not H3, but was in an earlier commit on this branch — no scope creep in commit 484612a.
+
+**Spec fidelity: 4/5 criteria met** (criterion 3 partially met — same count, different files).
 
 ### 7. Guardrail Compliance — PASS
 
-- **File length:** All files under 500 lines. Largest: background.test.ts at 404 lines. ✅
-- **Scope:** All modified source files are within declared scope (extension/, pipeline/, root vitest config). ✅
-- **Fixed surfaces:** `eval/score.py` not modified. ✅
-- **Factory contents:** `.factory/` changes are metadata/state only — no `.factory/` content files improperly modified. ✅
+- **No file exceeds 500 lines**: Largest file is `export.ts` at 141 lines.
+- **All modified files within declared scope**: All changes are in `pipeline/src/**`, `extension/components/**`, and `shared/src/**` — all within the factory config `scope` array.
+- **No fixed surfaces modified**: No fixed surfaces declared; none modified.
+- **No modifications to `eval/score.py`**: `eval/score.py` was created in an earlier commit, not modified by 484612a.
+- **No `.factory/` content modifications**: Only review/state files (expected).
 
 ---
 
-## Issues Found
+## Issues Summary
 
-| # | Severity | Category | File:Line | Description |
-|---|---|---|---|---|
-| 1 | important | correctness | pipeline/tsconfig.json:12 | `rootDir: "./src"` was removed when `types: ["vitest/globals"]` was added. These are independent options — both should coexist. Without `rootDir`, `tsc` build output changes structure (`dist/src/index.ts` instead of `dist/index.ts`). Mitigated because runtime uses `tsx` directly, but `npm run build` produces different output. Fix: add `"rootDir": "./src"` back alongside `"types"`. |
-| 2 | minor | scope | extension/entrypoints/background.ts:285-294 | `onMessage` handler refactored from callback to async pattern — a functional behavior change beyond pure type fixes. Justified by typing requirements under strict mode, but worth noting as it changes runtime behavior (Promise-based response instead of `sendResponse` callback). |
+| # | File | Line | Severity | Category | Description |
+|---|------|------|----------|----------|-------------|
+| 1 | `pipeline/src/config/reader.ts` | 39 | minor | correctness | `else` branch logs "no config file found" for ALL non-ZodError exceptions, including JSON parse errors. Message is misleading but behavior is correct. |
+| 2 | `shared/src/logger.ts` | — | important | missing-tests | New public module with 2 exported functions has no test coverage. |
+| 3 | `extension/components/logger.ts` | — | important | missing-tests | New public module with 1 exported function has no test coverage. |
+| 4 | (multiple) | — | important | scope | 6/10 hypothesis-listed files were not instrumented; 6 substitute files were instrumented instead. Total count matches, observability goal met. |
 
 ---
 
-## Plan Completion
+## Plan Completion Status
 
 | Deliverable | Status |
 |---|---|
-| vitest.config.ts workspace isolation | ✅ Created, references all 3 workspaces |
-| Extension type migration (chrome.* → webextension-polyfill) | ✅ All 6 type references migrated |
-| @types/chrome devDependency | ✅ Added to extension/package.json |
-| wxt-shims.d.ts ambient declaration | ✅ Created for `defineBackground` |
-| Pipeline module declarations | ✅ Created for write-file-atomic, chrome-native-messaging |
-| Pipeline vitest/globals types | ✅ Added to tsconfig.json |
-| Test fixture type alignment | ✅ 12+ fixtures updated (processId, temporary, mock annotations) |
+| `pino` + `pino-pretty` installed | ✅ Complete |
+| `shared/src/logger.ts` — createModuleLogger, createRequestLogger | ✅ Complete (not stubbed, real implementation) |
+| `extension/components/logger.ts` — browser-compatible logger | ✅ Complete (not stubbed, real implementation) |
+| 10 files instrumented with structured logging | ⚠️ 10 files instrumented, but different set than hypothesis specified |
+| Request ID tracing in CLI commands | ✅ Complete |
+| Observability score improvement | ✅ 0.176 → 0.597 (exceeds "0.55+" target) |
 
-No stubbed deliverables. All changes contain real implementations.
+**No stubs detected.** All implementations are functional — no `pass`, `throw NotImplementedError`, or empty bodies.
 
 ---
 
-## Overall Result: **ISSUES_FOUND**
+## Overall Result
 
-One **important** issue: `rootDir` removal in `pipeline/tsconfig.json` is likely unintentional and changes build output structure. No **critical** issues. All 7 categories pass. Spec fidelity 4/4.
+**ISSUES_FOUND** — No critical issues. Two important issues (missing tests, scope deviation) and one minor issue (misleading log message). None are blocking.
 
-**Recommendation:** Proceed to adversarial testing. The `rootDir` issue should be flagged for correction but does not block testing — the runtime is unaffected since `tsx` is used directly.
+**Gate: PROCEED to adversarial testing.**

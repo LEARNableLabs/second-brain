@@ -1,50 +1,26 @@
 # Archivist Agent Output
 
-- **timestamp:** 2026-08-19T18:48:04Z
+- **timestamp:** 2026-08-19T20:08:33Z
 - **exit_code:** 0
 
 ---
 
-Perfect! Archive complete. Here's the summary:
+✅ **Experiment #2 archived as KEEP.** Milestone reached — the factory is now functional.
 
-## ✅ Archive Complete — Cycle 001
+**What's recorded:**
+- Markdown experiment note: `.factory/archive/experiment-002.md` 
+- JSON sidecar: `.factory/archive/002.json`
+- Memory updated with two new entries: the composite hypothesis pattern and the critical milestone
+- Performance report regenerated (3 experiments tracked)
+- MemPalace archive updated
 
-I've recorded the first factory experiment cycle with both human-readable and machine-readable output:
+**Key artifacts:**
+- Score improvement: 0.308 → 0.5346 (+0.2266)
+- Dimension wins: `tests` 0.0 → 1.0, `type_check` 0.0 → 0.95
+- Root cause identified & fixed: factory was detecting jest instead of vitest for root sub-project
+- Playbook proposals saved for builder (workspace config and strict mode patterns)
 
-### Files Written
-
-**Experiment Records:**
-- `.factory/archive/experiment-001.md` — Full narrative of Experiment #1 (Manual Capture Features)
-- `.factory/archive/001.json` — Structured data sidecar for programmatic access
-- `.factory/archive/memory.json` — CEO cross-cycle memory (3 key insights)
-- `.factory/archive/CYCLE_001_SUMMARY.md` — Comprehensive cycle wrap-up
-
-**Factory State:**
-- `.factory/performance_report.json` — Updated performance metrics (1 experiment, 0 kept, 1 reverted)
-- MemPalace archive — Synced to knowledge graph
-
----
-
-### Critical Finding: 🚨 Factory Meta-Eval Blocker
-
-The **#1 priority for Cycle 002 is fixing the factory's test runner**. Here's why:
-
-| Signal | Value |
-|--------|-------|
-| npm test | ✅ 166/166 passing |
-| Factory meta-eval | ❌ 0/19 passing |
-| Code quality | ✅ All QA agents pass |
-| Composite score | ❌ 0.308 (below 0.5 threshold) |
-
-**Root cause:** The factory's `tests` dimension doesn't detect this monorepo's test structure. Until fixed, **no experiment can pass precheck**, making the factory non-functional. The code itself is high-quality—it's the meta-eval harness that's broken.
-
-**What's blocked:** H2 (Pino structured logging), type error fixes, and all future experiments.
-
----
-
-### Experiment #1 Outcome
-
-Manual capture features (context menu + keyboard shortcut) were **implemented flawlessly** but force-reverted by the precheck gate due to the meta-eval bug. The actual work was solid—Builder zero scope-creep, all tests pass, zero QA violations. This is an unfair revert, but unavoidable until the meta-eval is fixed.
+The factory precheck gate is now active. Subsequent experiments can cross the 0.5 threshold and achieve KEEP verdicts.
 ---
 
 > **⚠ CEO IDENTITY RE-ANCHOR (Sacred Rule 8)**

@@ -22,5 +22,20 @@
     "evidence": [1],
     "date": "2026-08-19",
     "confidence": "high"
+  },
+  {
+    "type": "pattern",
+    "text": "Bundled/composite hypotheses work well when the components are coupled blockers. H1 (vitest workspace) + H2 (TypeScript strict mode) were interdependent fixes that accelerated the path to a working factory.",
+    "evidence": [2],
+    "date": "2026-08-19",
+    "confidence": "high"
+  },
+  {
+    "type": "milestone",
+    "text": "First KEEP verdict achieved — Experiment #2. Factory evaluation is now functional. Composite score crossed precheck threshold (0.5346 > 0.5).",
+    "evidence": [2],
+    "date": "2026-08-19",
+    "severity": "critical",
+    "significance": "Marks transition from factory setup phase to active hypothesis experimentation"
   }
 ]

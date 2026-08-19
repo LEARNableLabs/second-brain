@@ -1,0 +1,1 @@
+Add Pino structured logging to pipeline and shared modules for observability growth

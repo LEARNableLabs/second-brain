@@ -1,74 +1,108 @@
-# Adversarial QA Report — Cycle 2 (H1 + H2 + H4)
+# Adversarial QA — Pino Structured Logging (H3)
 
-- **timestamp:** 2026-08-19T15:50:00Z
-- **project type:** CLI / Browser Extension (monorepo)
-- **scope:** Vitest workspace isolation (H1), TypeScript strict mode fixes (H2), manual capture features (H4)
+**Date:** 2026-08-19
+**Project type:** CLI (TypeScript monorepo)
+**Hypothesis:** H3 — Add Pino structured logging to pipeline and shared modules
 
 ---
 
 ## Smoke Test
 
-**Command:** `npm test`
 **Status:** PASS
 
+**Command:** `npm test`
+
+**Output:**
 ```
-extension: 7 test files, 83 tests passed
-pipeline: 10 test files, 78 tests passed
-shared: 2 test files, 5 tests passed
-Total: 19 files, 166 tests passed, 0 failed
+extension:  Test Files  7 passed (7)  |  Tests  83 passed (83)
+pipeline:   Test Files 10 passed (10) |  Tests  78 passed (78)
+shared:     Test Files  2 passed (2)  |  Tests   5 passed (5)
+Total: 19 test files, 166 tests passed, 0 failures
 ```
+
+All 166 tests pass. Pino log output appears in test stderr (structured JSON) without interfering with test assertions.
 
 ---
 
-## Acceptance Criteria
+## Feature Tests
 
-### AC-1: `npx vitest run` from root passes all 166 tests
+### Criterion 1: Logger creates valid JSON output
 
 **Status:** VERIFIED
 
 **Command:**
 ```bash
-npx vitest run
+npx tsx -e "
+import { createModuleLogger } from '@second-brain/shared/logger';
+const logger = createModuleLogger('test:json-parse');
+logger.info({ key: 'value', nested: { a: 1 } }, 'json parse test');
+" 2>&1 | node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')); console.log('VALID JSON: module=' + d.module + ' msg=' + d.msg + ' time=' + d.time)"
 ```
 
 **Output:**
 ```
- Test Files  19 passed (19)
-      Tests  166 passed (166)
-   Start at  15:49:23
-   Duration  2.71s
+VALID JSON: module=test:json-parse msg=json parse test time=2026-08-19T20:16:11.897Z
 ```
 
-**Evidence:** Root `vitest.config.ts` uses `projects: ['extension', 'pipeline', 'shared']` to properly isolate workspaces. Each workspace runs with its own vitest config (extension uses jsdom + Chrome API mocks via `tests/setup.ts`, pipeline uses node environment). No test failures. The `projects` approach in vitest v4 is equivalent to `vitest.workspace.ts` — both achieve workspace isolation.
+**Evidence:** Output is valid JSON with required fields: `level`, `time` (ISO 8601), `pid`, `hostname`, `module`, `msg`. JSON.parse succeeds without error. ISO timestamps confirmed (not epoch ms).
 
 ---
 
-### AC-2: `npx tsc --noEmit` in all workspaces shows 0 errors
+### Criterion 2: LOG_LEVEL env var works
 
 **Status:** VERIFIED
 
-**Commands and outputs:**
+**Command:**
 ```bash
-cd extension && npx tsc --noEmit
-# EXIT: 0 (no output = no errors)
-
-cd pipeline && npx tsc --noEmit
-# EXIT: 0 (no output = no errors)
-
-cd shared && npx tsc --noEmit
-# EXIT: 0 (no output = no errors)
+LOG_LEVEL=error npx tsx -e "
+import { createModuleLogger } from '@second-brain/shared/logger';
+const logger = createModuleLogger('test:filtering');
+logger.info('THIS SHOULD NOT APPEAR');
+logger.warn('THIS SHOULD NOT APPEAR EITHER');
+logger.error('ONLY THIS SHOULD APPEAR');
+"
 ```
 
-**Evidence:** All three workspaces compile cleanly under strict mode. Builder fixes:
-- Extension: Added `@types/chrome` as devDependency (fixes 33 "Cannot find namespace 'chrome'" errors)
-- Extension: Added `wxt-shims.d.ts` declaring `defineBackground` global
-- Extension: Fixed mock type casts in test setup
-- Pipeline: Added `modules.d.ts` declaring `write-file-atomic` and `chrome-native-messaging` modules
-- Pipeline: Updated `tsconfig.json` to include type declarations
+**Output:**
+```json
+{"level":50,"time":"2026-08-19T20:16:08.845Z","pid":70719,"hostname":"ggiannon-mac","module":"test:filtering","msg":"ONLY THIS SHOULD APPEAR"}
+```
+
+**Evidence:** Only the error-level message appeared. Info (level 30) and warn (level 40) were correctly filtered out. Also verified with LOG_LEVEL=warn — only warn and error appeared. Default (unset) correctly defaults to 'info' per `shared/src/logger.ts:3`.
 
 ---
 
-### AC-3: `npm test` passes
+### Criterion 3: RequestId is included in pipeline CLI commands
+
+**Status:** VERIFIED
+
+**Command:**
+```bash
+npx tsx -e "
+import { createRequestLogger } from '@second-brain/shared/logger';
+import crypto from 'crypto';
+const requestId = crypto.randomUUID();
+const logger = createRequestLogger('cmd:export', requestId);
+logger.info({ requestId }, 'export command started');
+logger.info({ processed: 42 }, 'processing captures');
+logger.error({ err: new Error('simulated failure') }, 'export failed');
+"
+```
+
+**Output:**
+```json
+{"level":30,...,"module":"cmd:export","requestId":"e4ca9616-...","traceContext":"e4ca9616-...","msg":"export command started"}
+{"level":30,...,"module":"cmd:export","requestId":"e4ca9616-...","traceContext":"e4ca9616-...","processed":42,"msg":"processing captures"}
+{"level":50,...,"module":"cmd:export","requestId":"e4ca9616-...","traceContext":"e4ca9616-...","err":{"type":"Error","message":"simulated failure","stack":"..."},"msg":"export failed"}
+```
+
+**Evidence:** All log lines include `requestId` and `traceContext` fields from the child logger context. Same UUID is consistent across all log entries for a single invocation. Verified `createRequestLogger` is used in `pipeline/src/commands/export.ts:24` and `pipeline/src/commands/generate.ts:20`.
+
+**Minor finding:** `requestId` key appears twice in the raw JSON string on the first log line — once from the child logger context and once from the explicit `{ requestId }` in the `.info()` call at `export.ts:25` / `generate.ts:22`. JSON.parse silently deduplicates (takes last value, both identical), so functionally harmless. Consider removing the explicit `{ requestId }` from log calls since it's already in the child context.
+
+---
+
+### Criterion 4: Logging doesn't break existing tests (166 pass)
 
 **Status:** VERIFIED
 
@@ -79,77 +113,102 @@ npm test
 
 **Output:**
 ```
-> extension@1.0.0 test → vitest run
-  Test Files  7 passed (7)
-       Tests  83 passed (83)
-
-> pipeline@0.1.0 test → vitest run
-  Test Files  10 passed (10)
-       Tests  78 passed (78)
-
-> @second-brain/shared@0.1.0 test → vitest run
-  Test Files  2 passed (2)
-       Tests  5 passed (5)
+extension:  7 test files,  83 tests passed
+pipeline:  10 test files,  78 tests passed
+shared:     2 test files,   5 tests passed
+Total: 19 files, 166 tests passed, 0 failures
 ```
 
-**Evidence:** `npm test` runs `npm run test --workspaces --if-present`, which invokes `vitest run` in each workspace independently. All pass with exit code 0.
+**Evidence:** All 166 tests pass across all three workspaces. Pino JSON logs appear in stderr during test runs (visible in output) but do not affect any test assertions.
 
 ---
 
-### AC-4: No regressions in extension functionality
+### Criterion 5: Error serialization works
 
 **Status:** VERIFIED
 
-**Evidence:**
+**Command:**
+```bash
+node -e "
+const pino = require('pino');
+const logger = pino({ level: 'info', timestamp: pino.stdTimeFunctions.isoTime });
+const child = logger.child({ module: 'test:error' });
+const err = new Error('test error from adversarial tester');
+child.error({ err }, 'caught an error');
+"
+```
 
-1. **All pre-existing tests pass unchanged:**
-   - `background.test.ts` — page load, tab activation, tab removal, install, startup, export handlers
-   - `blocklist.test.ts` — domain matching and pattern handling
-   - `dwell-tracker.test.ts` — 5s dwell threshold, cancel tracking, blocklist check
-   - `history-backfill.test.ts` — gap detection, backfill logic
-   - `popup.test.ts` — time formatting, module exports
-   - `storage.test.ts` — save/load, dedup, manual capture
+**Output:**
+```json
+{"level":50,"time":"2026-08-19T20:15:44.749Z","pid":70558,"hostname":"ggiannon-mac","module":"test:error","err":{"type":"Error","message":"test error from adversarial tester","stack":"Error: test error from adversarial tester\n    at [eval]:7:13\n    at ..."},"msg":"caught an error"}
+```
 
-2. **New manual capture features (H4) verified:**
-   - Context menu: `handleContextMenuClick` in `background.ts:195-210`, 4 tests pass
-   - Keyboard shortcut: `handleCommand` in `background.ts:215-222`, 4 tests pass
-   - Manifest declares `Cmd+Shift+S` / `Ctrl+Shift+S` in `wxt.config.ts:19-27`
-   - `contextMenus` permission added to manifest at `wxt.config.ts:9`
-
-3. **Eval score improvement confirmed:**
-   ```bash
-   python3 eval/score.py
-   # tests: 1.0 (was 0.0)
-   # Factory precheck gate is now unblocked
-   ```
+**Evidence:** Error object serialized with `type`, `message`, and full `stack` trace. Also confirmed in test output where real errors (ZodError, Network error) are properly serialized with their complete stack traces by Pino's built-in error serializer.
 
 ---
 
-## Edge Case Tests
+### Criterion 6: Browser logger doesn't import Node.js pino
 
-| Edge Case | Test | Result |
-|---|---|---|
-| Non-http URL via context menu (`chrome://`) | `ignores non-http URLs` | VERIFIED — silently dropped |
-| No active tab for keyboard shortcut | `does nothing when no active tab exists` | VERIFIED — returns false |
-| Non-http active tab for shortcut (`chrome://settings`) | `does nothing when active tab has no http URL` | VERIFIED — returns false |
-| Unrelated keyboard command | `ignores unrelated commands` | VERIFIED — returns immediately |
-| Right-click on link (link URL vs page URL) | `captures the link URL when right-clicking a link` | VERIFIED — linkUrl takes priority |
-| Manual capture on blocked domain | `captures on blocked domains (bypasses blocklist)` | VERIFIED — saves with source=manual |
-| Duplicate capture upgrade (live → manual) | `storage.test.ts` dedup tests | VERIFIED — upgrades source, no duplicate |
+**Status:** VERIFIED
+
+**Command:**
+```bash
+grep -rn "import.*pino\|require.*pino" extension/ --include="*.ts"
+```
+
+**Output:**
+```
+(no output — zero matches)
+```
+
+**Evidence:** No file in `extension/` imports or requires `pino`. The browser logger at `extension/components/logger.ts` uses a pure `console.*` wrapper implementing the same `createModuleLogger(name)` API signature. It defines its own `Logger` interface and wraps `console.log/warn/error/debug` with a `[module]` prefix. No Node.js dependencies — safe for Chrome extension runtime.
 
 ---
 
-## Observations (non-blocking)
+## Edge Cases Tested
 
-1. **Context menu creation location:** `contextMenus.create()` is called at service worker init (`background.ts:272`) rather than inside `onInstalled` as the strategy recommended. This can produce a harmless "duplicate ID" console error on SW restart. Not a regression (same pattern as cycle 1), and Chrome handles the duplicate silently — the context menu still works.
+| Edge Case | Result |
+|---|---|
+| Child logger inherits module context | VERIFIED — `module` field present in all child output |
+| LOG_LEVEL defaults to 'info' when unset | VERIFIED — info-level output appears without LOG_LEVEL set |
+| ISO timestamp format (not epoch ms) | VERIFIED — `time` field is ISO 8601 string |
+| pino-pretty in devDependencies (not prod) | VERIFIED — `pipeline/package.json` lists it under devDependencies |
+| pino in shared + pipeline dependencies | VERIFIED — both `shared/package.json` and `pipeline/package.json` include `pino: ^10.3.1` |
+| Shared logger exported correctly | VERIFIED — `shared/package.json` exports `./logger` path mapping to `./src/logger.ts` |
+
+---
+
+## Acceptance Criteria Summary
+
+| # | Criterion | Status |
+|---|-----------|--------|
+| 1 | Logger creates valid JSON output | VERIFIED |
+| 2 | LOG_LEVEL env var works | VERIFIED |
+| 3 | RequestId included in pipeline CLI commands | VERIFIED |
+| 4 | Logging doesn't break existing tests (166 pass) | VERIFIED |
+| 5 | Error serialization with stack trace | VERIFIED |
+| 6 | Browser logger doesn't import Node.js pino | VERIFIED |
+
+---
+
+## Issues Found
+
+### Minor: Duplicate `requestId` key in raw JSON (non-blocking)
+
+- **Location:** `pipeline/src/commands/export.ts:25`, `pipeline/src/commands/generate.ts:22`
+- **Issue:** Both commands pass `{ requestId }` explicitly in the `.info()` call, but `requestId` is already set in the child logger context via `createRequestLogger`. Produces raw JSON with duplicate `requestId` keys.
+- **Impact:** Functionally harmless — JSON.parse takes last value, both values are identical. But technically non-conformant per RFC 8259 (names SHOULD be unique).
+- **Fix:** Remove the explicit `{ requestId }` from the `.info()` calls since it's already in the child context.
 
 ---
 
 ## Adversarial Verdict: **PASS**
 
-All 4 acceptance criteria verified with command output evidence:
-- 166/166 tests pass via `npx vitest run` from project root
-- 0 TypeScript errors across all 3 workspaces
-- `npm test` passes cleanly
-- No regressions in existing extension functionality
-- Eval `tests` dimension moved from 0.0 to 1.0, unblocking the factory precheck gate
+All 6 acceptance criteria VERIFIED with command output evidence. The Pino structured logging implementation is correct and well-integrated:
+- `shared/src/logger.ts` exports `createModuleLogger` and `createRequestLogger` backed by Pino
+- JSON output is valid and parseable with ISO timestamps
+- LOG_LEVEL env var correctly filters log levels
+- Request tracing via requestId/traceContext works across log entries
+- Error serialization includes full stack traces (type, message, stack)
+- Browser extension uses a separate console-based logger with no pino dependency
+- All 166 existing tests continue to pass without interference

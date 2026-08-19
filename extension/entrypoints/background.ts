@@ -4,7 +4,10 @@ import { startTracking, cancelTracking } from '../components/dwell-tracker';
 import { loadBlocklist, isBlocked, loadDefaultBlocklist, flattenBlocklist } from '../components/blocklist';
 import { detectGap, backfillHistory } from '../components/history-backfill';
 import { loadStorage, saveStorage, saveManualCapture } from '../components/storage';
+import { createModuleLogger } from '../components/logger';
 import type { CaptureEntry } from '../components/types';
+
+const logger = createModuleLogger('background');
 
 /**
  * Background Service Worker - Event-Driven Capture Engine
@@ -204,8 +207,9 @@ export async function handleContextMenuClick(
     const url = new URL(targetUrl);
     const title = (info.linkUrl ? '' : tab?.title) || '';
     await saveManualCapture(targetUrl, title, url.hostname);
+    logger.info({ url: targetUrl, source: 'context-menu' }, 'manual capture saved');
   } catch (error) {
-    console.error('Error in handleContextMenuClick:', error);
+    logger.error({ error: String(error) }, 'error in handleContextMenuClick');
   }
 }
 
@@ -215,9 +219,12 @@ export async function handleContextMenuClick(
 export async function handleCommand(command: string): Promise<void> {
   if (command !== 'save-current-page') return;
   try {
-    await captureActiveTab();
+    const saved = await captureActiveTab();
+    if (saved) {
+      logger.info({ source: 'keyboard-shortcut' }, 'manual capture saved');
+    }
   } catch (error) {
-    console.error('Error in handleCommand:', error);
+    logger.error({ error: String(error) }, 'error in handleCommand');
   }
 }
 

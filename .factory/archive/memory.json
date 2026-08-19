@@ -52,5 +52,20 @@
     "date": "2026-08-19",
     "severity": "high",
     "significance": "Demonstrates factory's ability to compound improvements across cycles"
+  },
+  {
+    "type": "pattern",
+    "text": "Failed experiments from prior cycles can succeed on re-attempt with architectural corrections. Cycle 1 Exp #1 (manual capture) failed due to incorrect MV3 API placement; Cycle 2 Exp #4 succeeded with contextMenus.create() moved to onInstalled listener.",
+    "evidence": [1, 4],
+    "date": "2026-08-19",
+    "confidence": "high"
+  },
+  {
+    "type": "milestone",
+    "text": "CYCLE 2 COMPLETE — All 3 active experiments KEPT. Composite score: 0.308 → 0.6049 (+0.2969, +96.4%). Factory fully functional and producing cumulative value.",
+    "evidence": [2, 3, 4],
+    "date": "2026-08-19",
+    "severity": "critical",
+    "significance": "Marks factory transition from setup/debugging to stable, productive operation. Ready for scaled hypothesis exploration in Cycle 3."
   }
 ]

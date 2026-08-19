@@ -1,0 +1,15 @@
+{
+  "id": 4,
+  "timestamp": "2026-08-19 16:29:59.487987",
+  "hypothesis": "Re-attempt manual capture features for capability_surface growth",
+  "change_summary": "Manual capture features from cycle 1 now kept (context menu + keyboard shortcut). Fixed contextMenus.create placement to onInstalled listener. Added structured logging to handlers.",
+  "issue_number": null,
+  "pr_number": 12,
+  "score_before": 0.5865,
+  "score_after": 0.6049,
+  "delta": 0.0184,
+  "verdict": "keep",
+  "cost_usd": 3.5184066499999997,
+  "notes": "ceo:keep composite=0.6049 delta=+0.0184 experiment_diversity=0.686(was_0.5) factory_effectiveness=0.525(was_0.5) qa_iterations=2 redirect_reason=contextMenus_not_in_onInstalled",
+  "research_citations": []
+}

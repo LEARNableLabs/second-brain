@@ -1,25 +1,43 @@
 # Archivist Agent Output
 
-- **timestamp:** 2026-08-19T20:20:11Z
+- **timestamp:** 2026-08-19T20:31:38Z
 - **exit_code:** 0
 
 ---
 
-✓ **Experiment #3 archived successfully.**
+## Cycle 2 Archive Complete ✅
 
-**Verdict: KEEP**
-- **Composite score:** 0.5346 → 0.5865 (+0.0519)
-- **Observability (key win):** 0.176 → 0.708 (+0.532)
-- **QA gates:** All passed (health check, code review, adversarial testing)
+**All blocking archival tasks finished.**
 
-**Archival complete:**
-- Markdown: `.factory/archive/experiment-003.md`
-- JSON sidecar: `.factory/archive/003.json`
-- Memory updated with 2 new insights: observability pattern + consecutive KEEP milestone
-- Performance report regenerated
-- MemPalace archive synced
+### What Was Archived
 
-The structured logging pattern with RequestId tracing is now documented as a high-confidence playbook entry for future builders. Consecutive KEEPs establish momentum — the factory is compounding improvements across cycles.
+**Experiment Records (Dual Output — Markdown + JSON):**
+- **Exp #2** (Vitest + TypeScript): Score 0.308→0.5346 (+0.2266) — **Unblocked the entire factory**
+- **Exp #3** (Pino Logging): Score 0.5346→0.5865 (+0.0519) — **Observability breakthrough** (0.176→0.708)
+- **Exp #4** (Manual Capture): Score 0.5865→0.6049 (+0.0184) — **Capability restored** with MV3 fix
+
+**CEO Memory Updated:**
+- 9 total entries (patterns, anti-patterns, agent_perf, milestones)
+- Added key insight: Failed experiments can succeed on re-attempt with architectural corrections
+- Added final milestone: Factory fully operational, +96.4% improvement, ready for Cycle 3
+
+**Cycle 2 Summary:**
+- 6.8K comprehensive report in `.factory/archive/CYCLE_002_SUMMARY.md`
+- Documents root causes, patterns, cross-experiment learnings
+- Establishes readiness for scaled experimentation in Cycle 3
+
+**Performance Artifacts:**
+- Factory performance report regenerated
+- MemPalace episodic data archived
+
+### Key Insights from Cycle 2
+
+1. **Infrastructure-first unlocks productivity** — Fixing test detection (Exp #2) unblocked everything downstream
+2. **Observability is high-ROI** — Single experiment (+0.0519 score) achieved +53pt on observability dimension
+3. **Failed hypotheses can be retried** — Cycle 1's manual capture failed due to API placement; Cycle 2 succeeded with architecture fix
+4. **QA gates catch subtleties** — 2 iterations caught and guided the contextMenus.create() placement bug
+
+**Factory now fully operational with 166/166 tests passing, zero type errors, composite score 0.6049. Ready for PR #12 merge and Cycle 3 planning.**
 ---
 
 > **⚠ CEO IDENTITY RE-ANCHOR (Sacred Rule 8)**

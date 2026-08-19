@@ -1,0 +1,53 @@
+{
+  "goal": "Evolve Second Brain \u2014 an automated knowledge capture system that passively logs browsing history and uses AI to curate daily highlights in an Obsidian vault \u2014 into a reliable, well-tested, observable system that captures browsing data and produces high-quality AI-curated daily digests.",
+  "scope": [
+    "pipeline/src/**",
+    "pipeline/tests/**",
+    "extension/components/**",
+    "extension/entrypoints/**",
+    "extension/tests/**",
+    "shared/src/**",
+    "shared/tests/**",
+    "eval/score.py"
+  ],
+  "guards": [
+    "Do not modify `.obsidian/` \u2014 Obsidian app configuration",
+    "Do not delete or overwrite existing tests",
+    "Do not introduce secrets or credentials in code",
+    "Do not modify files outside declared mutable paths",
+    "Do not merge PRs \u2014 leave open for human review",
+    "Do not lower eval thresholds"
+  ],
+  "eval_command": "python3 eval/score.py",
+  "eval_threshold": 0.5,
+  "constraints": [],
+  "hypothesis_budget": {
+    "min_growth": 2,
+    "max_new": 2
+  },
+  "target_branch": "main",
+  "smoke_test": "npm test",
+  "project_eval": [],
+  "eval_weights": {
+    "hygiene": 0.5,
+    "growth": 0.5,
+    "project": 0.0
+  },
+  "research_target": null,
+  "inner_loop": null,
+  "outer_loop": null,
+  "mutable_surfaces": [],
+  "fixed_surfaces": [],
+  "research_constraints": [],
+  "cost_budget": null,
+  "hard_constraints": [],
+  "eval_spec": [],
+  "hygiene_weights": null,
+  "growth_weights": null,
+  "adversarial": null,
+  "parallel": null,
+  "clean_pr": false,
+  "clean_pr_include": [],
+  "clean_pr_exclude": [],
+  "test_timeout": 600
+}

@@ -2,6 +2,9 @@ import browser from 'webextension-polyfill';
 import { BACKFILL_MAX_LOOKBACK_DAYS, BACKFILL_MAX_RESULTS, CaptureEntry } from './types';
 import { loadStorage, saveStorage, getToday } from './storage';
 import { isBlocked } from './blocklist';
+import { createModuleLogger } from './logger';
+
+const logger = createModuleLogger('history-backfill');
 
 /**
  * History Backfill - Full Implementation
@@ -38,24 +41,25 @@ const GAP_THRESHOLD_MS = 5 * 60 * 1000;
  * - Returns lastCaptureTimestamp if gap > 5 minutes
  */
 export async function detectGap(): Promise<number | null> {
+  logger.info('detecting capture gap');
   const storage = await loadStorage();
   const { lastCaptureTimestamp } = storage;
 
   const now = Date.now();
 
-  // First run — backfill last 24 hours of history
   if (lastCaptureTimestamp === 0) {
+    logger.info('first run detected, backfilling last 24 hours');
     return now - (24 * 60 * 60 * 1000);
   }
 
   const elapsed = now - lastCaptureTimestamp;
 
-  // No gap - recent capture
   if (elapsed <= GAP_THRESHOLD_MS) {
+    logger.debug({ elapsed }, 'no gap detected');
     return null;
   }
 
-  // Gap detected
+  logger.info({ elapsed, lastCaptureTimestamp }, 'gap detected');
   return lastCaptureTimestamp;
 }
 
@@ -75,6 +79,7 @@ export async function detectGap(): Promise<number | null> {
  * - Caps lookback at BACKFILL_MAX_LOOKBACK_DAYS (7 days)
  */
 export async function backfillHistory(gapStartTimestamp: number): Promise<number> {
+  logger.info({ gapStartTimestamp }, 'starting history backfill');
   const storage = await loadStorage();
   const { captures, blocklist } = storage;
 
@@ -145,7 +150,8 @@ export async function backfillHistory(gapStartTimestamp: number): Promise<number
     }
   }
 
-  // Update storage with backfilled entries and new lastCaptureTimestamp
+  logger.info({ backfillCount }, 'history backfill complete');
+
   await saveStorage({
     captures,
     lastCaptureTimestamp: now,

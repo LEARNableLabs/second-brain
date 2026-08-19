@@ -1,4 +1,5 @@
 import path from 'path';
+import crypto from 'crypto';
 import { getDatabase, closeDatabase } from '../db/connection.js';
 import { migrate } from '../db/migrate.js';
 import { getByDate, updateStatus } from '../db/operations.js';
@@ -7,6 +8,7 @@ import { fetchAllDescriptions } from '../generators/meta-fetcher.js';
 import { saveNote } from '../generators/writer.js';
 import { loadConfig, getOutputDir } from '../config/reader.js';
 import { ensureGitRepo, autoCommitNotes } from '../git/auto-commit.js';
+import { createRequestLogger } from '@second-brain/shared/logger';
 
 interface GenerateOptions {
   date?: string;
@@ -14,7 +16,10 @@ interface GenerateOptions {
 }
 
 export async function generateCommand(options: GenerateOptions = {}): Promise<void> {
+  const requestId = crypto.randomUUID();
+  const logger = createRequestLogger('cmd:generate', requestId);
   const date = options.date || new Date().toISOString().split('T')[0];
+  logger.info({ requestId, date }, 'generate command started');
   console.error(`Generating daily note for ${date}...`);
 
   const config = await loadConfig();
@@ -24,6 +29,7 @@ export async function generateCommand(options: GenerateOptions = {}): Promise<vo
   try {
     const { applied } = migrate(db);
     if (applied > 0) {
+      logger.info({ applied }, 'applied migrations');
       console.error(`Applied ${applied} migration(s).`);
     }
 
@@ -59,9 +65,11 @@ export async function generateCommand(options: GenerateOptions = {}): Promise<vo
       console.error('Auto-committed to notes repository');
     }
   } catch (err) {
+    logger.error({ err }, 'generate failed');
     console.error('Generate failed:', err);
     process.exitCode = 1;
   } finally {
+    logger.info('generate command finished');
     closeDatabase(db);
   }
 }

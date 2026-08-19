@@ -1,5 +1,8 @@
 import { renderFrontmatter } from './frontmatter.js';
 import type { CaptureRow } from '../db/operations.js';
+import { createModuleLogger } from '@second-brain/shared/logger';
+
+const logger = createModuleLogger('generators:markdown');
 
 export function escapeMarkdown(text: string): string {
   return text.replace(/([\\`*_\[\]()#+\-!])/g, '\\$1');
@@ -31,6 +34,7 @@ export function formatEntry(entry: CaptureRow & { description?: string }): strin
 }
 
 export function groupByDomain(entries: CaptureRow[]): Record<string, CaptureRow[]> {
+  logger.debug({ count: entries.length }, 'grouping entries by domain');
   const grouped: Record<string, CaptureRow[]> = {};
 
   for (const entry of entries) {
@@ -57,6 +61,7 @@ export function generateDailyNote(
   descriptions?: Map<string, string>,
   aiSummary?: string
 ): string {
+  logger.info({ date, entryCount: entries.length }, 'generating daily note');
   const frontmatter = renderFrontmatter(date, entries);
 
   let note = frontmatter;

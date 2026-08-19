@@ -37,5 +37,20 @@
     "date": "2026-08-19",
     "severity": "critical",
     "significance": "Marks transition from factory setup phase to active hypothesis experimentation"
+  },
+  {
+    "type": "pattern",
+    "text": "Observability improvements are high-impact and low-risk. Structured logging experiments (H3) deliver transformative gains (53pt on observability dimension) with no regressions.",
+    "evidence": [3],
+    "date": "2026-08-19",
+    "confidence": "high"
+  },
+  {
+    "type": "milestone",
+    "text": "Consecutive KEEP verdicts established — Experiments #2 and #3. Composite score momentum: 0.5346 → 0.5865 (+0.0519). Factory is producing reliable, cumulative improvements.",
+    "evidence": [2, 3],
+    "date": "2026-08-19",
+    "severity": "high",
+    "significance": "Demonstrates factory's ability to compound improvements across cycles"
   }
 ]

@@ -1,0 +1,1 @@
+Re-attempt manual capture features (context menu + keyboard shortcut) for capability_surface growth

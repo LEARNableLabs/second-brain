@@ -1,12 +1,12 @@
 {
-  "total": 0.30626470588235294,
+  "total": 0.30843,
   "results": [
     {
       "name": "tests",
       "score": 0.0,
       "weight": 0.155,
       "passed": false,
-      "details": "(js): 0 passed, 18 failed"
+      "details": "(js): 0 passed, 19 failed"
     },
     {
       "name": "lint",
@@ -20,7 +20,7 @@
       "score": 0.0,
       "weight": 0.05,
       "passed": false,
-      "details": "(ts): 1 errors; extension(ts): 24 errors; pipeline(ts): 12 errors; shared(ts): clean"
+      "details": "(ts): 1 errors; extension(ts): 33 errors; pipeline(ts): 12 errors; shared(ts): clean"
     },
     {
       "name": "coverage",
@@ -46,42 +46,42 @@
     {
       "name": "capability_surface",
       "score": 0.04,
-      "weight": 0.12254901960784313,
+      "weight": 0.125,
       "passed": false,
       "details": "surface=4 (modules=1, public_fns=3, entry_points=0), target=100"
     },
     {
       "name": "experiment_diversity",
       "score": 0.5,
-      "weight": 0.09803921568627451,
+      "weight": 0.1,
       "passed": true,
       "details": "Only 0 experiments, too few to judge"
     },
     {
       "name": "observability",
-      "score": 0.181,
-      "weight": 0.08823529411764705,
+      "score": 0.177,
+      "weight": 0.09,
       "passed": false,
-      "details": "observability_score=0.18, function_coverage=0.20, structured_logging=False"
+      "details": "observability_score=0.18, function_coverage=0.19, structured_logging=False"
     },
     {
       "name": "research_grounding",
       "score": 0.0,
-      "weight": 0.0784313725490196,
-      "passed": true,
-      "details": "vault not configured \u2014 set $FACTORY_VAULT_PATH"
+      "weight": 0.07,
+      "passed": false,
+      "details": "sources=0 (archive), utilization=0.00, research_report=no, doc_ratio=0.00 (0/1), citation_ratio=0.00"
     },
     {
       "name": "factory_effectiveness",
       "score": 0.5,
-      "weight": 0.06372549019607843,
+      "weight": 0.065,
       "passed": true,
       "details": "Only 0 experiments, too few to judge"
     },
     {
       "name": "spec_compliance",
       "score": 0.5,
-      "weight": 0.049019607843137254,
+      "weight": 0.05,
       "passed": true,
       "details": "spec_results.json not found \u2014 neutral score"
     }

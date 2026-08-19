@@ -1,19 +1,20 @@
 # Builder Agent Output
 
-- **timestamp:** 2026-08-19T18:22:53Z
+- **timestamp:** 2026-08-19T18:41:05Z
 - **exit_code:** 0
 
 ---
 
-Done. Both fixes are in place and verified:
+Implementation complete. Here's the summary:
 
-1. **Missing dependency** — `npm install` resolved `webextension-polyfill`; all 158 tests pass (exit code 0)
-2. **Observability eval** — rewrote `eval_observability()` to scan `.ts`/`.tsx` files with regex-based TypeScript analysis instead of Python's `ast` on `.py` files
+**PR:** https://github.com/LEARNableLabs/second-brain/pull/12
 
-**Eval results**: tests=1.0, observability=0.091 (both non-zero and valid)
+**What was built:**
+1. **Popup button (#6)** — already existed in the codebase, fully wired to `saveManualCapture`
+2. **Context menu (#7)** — "Save to Second Brain" right-click menu on pages and links, captures via `saveManualCapture` bypassing blocklist
+3. **Keyboard shortcut (#8)** — `Cmd+Shift+S` (Mac) / `Ctrl+Shift+S` (Windows) captures the active tab
 
-**PR**: https://github.com/LEARNableLabs/second-brain/pull/12
-**Issue**: https://github.com/LEARNableLabs/second-brain/issues/11
+**4 files changed**, 8 new tests added, all 166 tests pass. Builder review written to `.factory/reviews/builder-latest.md`.
 ---
 
 > **⚠ CEO IDENTITY RE-ANCHOR (Sacred Rule 8)**

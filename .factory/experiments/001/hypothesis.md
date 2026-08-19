@@ -1,0 +1,1 @@
+Add manual capture features — popup button, context menu, keyboard shortcut (issues #6, #7, #8) to improve capability_surface

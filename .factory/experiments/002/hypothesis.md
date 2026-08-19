@@ -1,0 +1,1 @@
+Fix vitest workspace isolation (tests 0→1.0) and TypeScript strict mode errors (type_check 0→1.0) to cross 0.5 threshold and unblock factory

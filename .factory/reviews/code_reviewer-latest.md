@@ -1,13 +1,17 @@
 # Code_Reviewer Agent Output
 
-- **timestamp:** 2026-08-19T18:44:31Z
+- **timestamp:** 2026-08-19T19:52:32Z
 - **exit_code:** 0
 
 ---
 
-Code review complete. **Result: CLEAN** — proceed to adversarial testing.
+Code review complete. **Result: ISSUES_FOUND** — no critical blockers, proceed to adversarial testing.
 
-All 7 categories pass. The 4 changed files implement context menu (#7) and keyboard shortcut (#8) features, correctly reusing the existing `saveManualCapture` pipeline. Popup button (#6) was pre-existing and verified. 8 new tests cover happy paths and edge cases with no stubs. One minor issue found: `contextMenus.create()` could produce an uncaught rejection on service worker restart (duplicate ID), but this doesn't affect functionality.
+Key findings:
+- **7/7 categories pass.** Vitest workspace config is correct, type migrations are accurate, test fixtures properly aligned.
+- **1 important issue:** `pipeline/tsconfig.json` lost its `rootDir: "./src"` when `types: ["vitest/globals"]` was added on the same line. These are independent options and both should coexist. No runtime impact (project uses `tsx`), but `npm run build` output structure changes.
+- **1 minor note:** The `onMessage` handler was refactored from callback to async pattern — a functional change beyond pure type fixes, but justified by strict mode typing requirements.
+- **Spec fidelity: 4/4 criteria met.** No stubs.
 
 Review written to `.factory/reviews/code-review.md`.
 ---

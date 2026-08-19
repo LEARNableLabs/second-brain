@@ -1,18 +1,20 @@
 # Adversarial_Tester Agent Output
 
-- **timestamp:** 2026-08-19T18:45:30Z
+- **timestamp:** 2026-08-19T19:51:46Z
 - **exit_code:** 0
 
 ---
 
-Adversarial QA complete. Verdict: **PASS**.
+Adversarial QA complete. **Verdict: PASS.**
 
-All three acceptance criteria verified with evidence:
-1. **Context menu** — handler, manifest permission, blocklist bypass all confirmed (4 tests passing)
-2. **Keyboard shortcut** — Cmd+Shift+S defined in manifest, handler wired, edge cases covered (4 tests passing)
-3. **Popup button** — already existed and wired to `saveManualCapture` (no change needed)
+Summary of findings:
+- **`npx vitest run`**: 19 files, 166 tests — all pass (VERIFIED)
+- **`npx tsc --noEmit`**: 0 errors in all 3 workspaces (VERIFIED)
+- **`npm test`**: all workspaces pass cleanly (VERIFIED)
+- **No regressions**: all pre-existing tests pass, new manual capture features work correctly with edge cases covered
+- **Eval score**: `tests` dimension moved from 0.0 to 1.0 — factory precheck gate is unblocked
 
-No regressions: 166 tests pass, zero new TypeScript errors. One non-blocking observation about context menu recreation on service worker restart (produces console noise but doesn't break functionality). Report written to `.factory/reviews/adversarial-qa.md`.
+One non-blocking observation: `contextMenus.create()` is still called at SW init rather than inside `onInstalled` (harmless duplicate ID error on restart). Report written to `.factory/reviews/adversarial-qa.md`.
 ---
 
 > **⚠ CEO IDENTITY RE-ANCHOR (Sacred Rule 8)**

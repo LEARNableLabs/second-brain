@@ -1,18 +1,25 @@
 # Health_Checker Agent Output
 
-- **timestamp:** 2026-08-19T18:42:44Z
+- **timestamp:** 2026-08-19T20:06:44Z
 - **exit_code:** 0
 
 ---
 
-Health check complete. **Result: PASS**
+## Health Check Result: **PASS**
 
-- **Composite score:** 0.308 vs 0.306 baseline (+0.002, within noise)
-- **Unit tests:** All 166 pass (83 extension + 78 pipeline + 5 shared)
-- **Guard violations:** None
-- The factory meta-eval's `tests=0.0` is a pre-existing monorepo detection issue, not a regression — actual `npm test` confirms all tests pass
+| Metric | Value |
+|---|---|
+| **Composite** | **0.5346** (baseline 0.308, **+0.2266 / +73.6%**) |
+| **Threshold (0.5)** | **MET** |
+| **Unit tests** | **166/166 passing** (19 test files, 3 workspaces, exit 0) |
 
-Report written to `.factory/reviews/health-check.md`.
+**Key dimension deltas:**
+- **tests**: 0.0 → **1.0** (+1.0) — vitest root devDep fix worked
+- **type_check**: 0.0 → **0.95** (+0.95) — TS strict mode errors resolved
+- **coverage**: 0.5 → **0.6903** (+0.19) — coverage now detected via @vitest/coverage-v8
+- All other dimensions: unchanged (no regressions)
+
+No guard violations. Report written to `.factory/reviews/health-check.md`.
 ---
 
 > **⚠ CEO IDENTITY RE-ANCHOR (Sacred Rule 8)**

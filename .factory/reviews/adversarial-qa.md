@@ -1,221 +1,155 @@
-# Adversarial QA Report
+# Adversarial QA Report — Cycle 2 (H1 + H2 + H4)
 
-- **timestamp:** 2026-08-19T14:45:00Z
-- **hypothesis:** H1 — Add manual capture features (context menu, keyboard shortcut)
-- **project type:** Browser Extension (Chrome MV3, WXT framework)
+- **timestamp:** 2026-08-19T15:50:00Z
+- **project type:** CLI / Browser Extension (monorepo)
+- **scope:** Vitest workspace isolation (H1), TypeScript strict mode fixes (H2), manual capture features (H4)
 
 ---
 
 ## Smoke Test
 
 **Command:** `npm test`
-**Result:** PASS
+**Status:** PASS
 
 ```
 extension: 7 test files, 83 tests passed
 pipeline: 10 test files, 78 tests passed
 shared: 2 test files, 5 tests passed
-Total: 166 tests passed, 0 failed
+Total: 19 files, 166 tests passed, 0 failed
 ```
 
 ---
 
-## TypeScript Regression Check
+## Acceptance Criteria
 
-**Command:** `npx tsc --noEmit -p extension/tsconfig.json 2>&1 | grep -c "error TS"`
-**Result:** PASS — No new TS errors
+### AC-1: `npx vitest run` from root passes all 166 tests
 
-- Before builder's commit: 33 TS errors (pre-existing, `@types/chrome` not installed)
-- After builder's commit: 33 TS errors (identical set)
-- **Verdict:** Builder introduced zero new type errors.
+**Status:** VERIFIED
+
+**Command:**
+```bash
+npx vitest run
+```
+
+**Output:**
+```
+ Test Files  19 passed (19)
+      Tests  166 passed (166)
+   Start at  15:49:23
+   Duration  2.71s
+```
+
+**Evidence:** Root `vitest.config.ts` uses `projects: ['extension', 'pipeline', 'shared']` to properly isolate workspaces. Each workspace runs with its own vitest config (extension uses jsdom + Chrome API mocks via `tests/setup.ts`, pipeline uses node environment). No test failures. The `projects` approach in vitest v4 is equivalent to `vitest.workspace.ts` — both achieve workspace isolation.
 
 ---
 
-## Feature Tests
-
-### Acceptance Criterion 1: Context Menu — "Save to Second Brain" on right-click
+### AC-2: `npx tsc --noEmit` in all workspaces shows 0 errors
 
 **Status:** VERIFIED
 
-**Evidence — test suite:**
+**Commands and outputs:**
+```bash
+cd extension && npx tsc --noEmit
+# EXIT: 0 (no output = no errors)
+
+cd pipeline && npx tsc --noEmit
+# EXIT: 0 (no output = no errors)
+
+cd shared && npx tsc --noEmit
+# EXIT: 0 (no output = no errors)
 ```
-$ npx vitest run tests/manual-capture.test.ts --reporter=verbose
 
- ✓ context menu capture > captures the page URL when right-clicking the page (2ms)
- ✓ context menu capture > captures the link URL when right-clicking a link (0ms)
- ✓ context menu capture > ignores non-http URLs (0ms)
- ✓ context menu capture > captures on blocked domains (bypasses blocklist) (0ms)
+**Evidence:** All three workspaces compile cleanly under strict mode. Builder fixes:
+- Extension: Added `@types/chrome` as devDependency (fixes 33 "Cannot find namespace 'chrome'" errors)
+- Extension: Added `wxt-shims.d.ts` declaring `defineBackground` global
+- Extension: Fixed mock type casts in test setup
+- Pipeline: Added `modules.d.ts` declaring `write-file-atomic` and `chrome-native-messaging` modules
+- Pipeline: Updated `tsconfig.json` to include type declarations
 
- Test Files  1 passed (1)
-      Tests  8 passed (8)
-```
+---
 
-**Evidence — code inspection:**
-
-| Check | File:Line | Result |
-|---|---|---|
-| `contextMenus` permission in manifest | `wxt.config.ts:9` | PRESENT |
-| Context menu created with correct ID | `background.ts:272` | `id: 'save-to-second-brain'` |
-| Contexts include `page` and `link` | `background.ts:274` | `contexts: ['page', 'link']` |
-| Click handler registered | `background.ts:276` | `onClicked.addListener(handleContextMenuClick)` |
-| Handler uses `saveManualCapture` | `background.ts:205` | Calls `saveManualCapture(targetUrl, title, url.hostname)` |
-| linkUrl takes priority over pageUrl | `background.ts:199` | `info.linkUrl \|\| info.pageUrl` |
-| Non-http URLs filtered | `background.ts:200-201` | Checks `startsWith('http://')` and `startsWith('https://')` |
-| Error handling present | `background.ts:206-208` | try/catch wrapping |
-
-### Acceptance Criterion 2: Keyboard Shortcut — Cmd+Shift+S to capture active tab
+### AC-3: `npm test` passes
 
 **Status:** VERIFIED
 
-**Evidence — test suite:**
-```
- ✓ keyboard shortcut capture > captures active tab on save-current-page command (0ms)
- ✓ keyboard shortcut capture > ignores unrelated commands (0ms)
- ✓ keyboard shortcut capture > does nothing when active tab has no http URL (0ms)
- ✓ keyboard shortcut capture > does nothing when no active tab exists (0ms)
+**Command:**
+```bash
+npm test
 ```
 
-**Evidence — code inspection:**
-
-| Check | File:Line | Result |
-|---|---|---|
-| Command defined in manifest | `wxt.config.ts:19-27` | `'save-current-page'` with `Command+Shift+S` (Mac) / `Ctrl+Shift+S` (Windows) |
-| Command handler registered | `background.ts:279` | `browser.commands.onCommand.addListener(handleCommand)` |
-| Handler only responds to correct command | `background.ts:215` | `if (command !== 'save-current-page') return;` |
-| Uses shared `captureActiveTab()` | `background.ts:217` | Calls `captureActiveTab()` |
-| `captureActiveTab()` uses `saveManualCapture` | `background.ts:188` | Bypasses blocklist correctly |
-| Non-http URLs filtered | `background.ts:184` | Checks `startsWith('http://')` and `startsWith('https://')` |
-| No-tab edge case handled | `background.ts:183-185` | Returns false if `tabs[0]` is undefined or has no URL |
-| Error handling present | `background.ts:218-220` | try/catch wrapping |
-
-### Acceptance Criterion 3: Popup Button (#6) — already existed
-
-**Status:** VERIFIED (pre-existing)
-
-**Evidence — code inspection:**
+**Output:**
 ```
-$ grep -n "saveManualCapture" extension/entrypoints/popup/main.ts
-2:import { ... saveManualCapture } from '../../components/storage';
-193:        await saveManualCapture(url, title, domain);
+> extension@1.0.0 test → vitest run
+  Test Files  7 passed (7)
+       Tests  83 passed (83)
+
+> pipeline@0.1.0 test → vitest run
+  Test Files  10 passed (10)
+       Tests  78 passed (78)
+
+> @second-brain/shared@0.1.0 test → vitest run
+  Test Files  2 passed (2)
+       Tests  5 passed (5)
 ```
 
-Builder correctly identified the popup button already existed and was wired to `saveManualCapture`. No changes needed.
+**Evidence:** `npm test` runs `npm run test --workspaces --if-present`, which invokes `vitest run` in each workspace independently. All pass with exit code 0.
 
-### Acceptance Criterion 4: All manual captures bypass blocklist
+---
+
+### AC-4: No regressions in extension functionality
 
 **Status:** VERIFIED
 
-**Evidence — test suite:**
-```
- ✓ context menu capture > captures on blocked domains (bypasses blocklist)
-```
+**Evidence:**
 
-**Evidence — storage test:**
-```
- ✓ saveManualCapture > saves manual capture on blocked domain (bypasses blocklist)
-```
+1. **All pre-existing tests pass unchanged:**
+   - `background.test.ts` — page load, tab activation, tab removal, install, startup, export handlers
+   - `blocklist.test.ts` — domain matching and pattern handling
+   - `dwell-tracker.test.ts` — 5s dwell threshold, cancel tracking, blocklist check
+   - `history-backfill.test.ts` — gap detection, backfill logic
+   - `popup.test.ts` — time formatting, module exports
+   - `storage.test.ts` — save/load, dedup, manual capture
 
-**Evidence — code inspection:**
-`saveManualCapture()` in `storage.ts:73-111` does NOT call `loadBlocklist()` or `isBlocked()`. It saves directly to storage regardless of domain. This is the correct behavior — the whole point of manual capture is to override the blocklist.
+2. **New manual capture features (H4) verified:**
+   - Context menu: `handleContextMenuClick` in `background.ts:195-210`, 4 tests pass
+   - Keyboard shortcut: `handleCommand` in `background.ts:215-222`, 4 tests pass
+   - Manifest declares `Cmd+Shift+S` / `Ctrl+Shift+S` in `wxt.config.ts:19-27`
+   - `contextMenus` permission added to manifest at `wxt.config.ts:9`
 
-### Acceptance Criterion 5: Captures tagged with `source: 'manual'`
-
-**Status:** VERIFIED
-
-**Evidence — test assertions confirming `source: 'manual'`:**
-- `manual-capture.test.ts:80` — context menu page capture
-- `manual-capture.test.ts:122` — context menu on blocked domain
-- `manual-capture.test.ts:155` — keyboard shortcut capture
-- `storage.test.ts:205` — saveManualCapture new entry
-- `storage.test.ts:227` — upgrade from live to manual
-- `storage.test.ts:245` — upgrade from backfill to manual
-- `storage.test.ts:256` — manual on blocked domain
+3. **Eval score improvement confirmed:**
+   ```bash
+   python3 eval/score.py
+   # tests: 1.0 (was 0.0)
+   # Factory precheck gate is now unblocked
+   ```
 
 ---
 
 ## Edge Case Tests
 
-### Edge 1: Non-http URL via context menu (chrome://, about://, javascript:)
-
-**Status:** VERIFIED
-
-Test `context menu capture > ignores non-http URLs` covers `chrome://extensions/`. The code at `background.ts:200-201` filters both `info.linkUrl` and `info.pageUrl` — any URL not starting with `http://` or `https://` is silently dropped.
-
-### Edge 2: No active tab for keyboard shortcut
-
-**Status:** VERIFIED
-
-Test `keyboard shortcut capture > does nothing when no active tab exists` mocks `tabs.query` returning empty array. `captureActiveTab()` at `background.ts:183` safely handles `tabs[0]` being undefined via optional chaining.
-
-### Edge 3: Non-http active tab for keyboard shortcut
-
-**Status:** VERIFIED
-
-Test `keyboard shortcut capture > does nothing when active tab has no http URL` mocks a `chrome://settings` tab. The function returns `false` without attempting to save.
-
-### Edge 4: Unrelated keyboard command
-
-**Status:** VERIFIED
-
-Test `keyboard shortcut capture > ignores unrelated commands` sends `'some-other-command'` — handler returns immediately without querying tabs.
-
-### Edge 5: Right-click on link (link URL vs page URL)
-
-**Status:** VERIFIED
-
-Test `context menu capture > captures the link URL when right-clicking a link` verifies that `info.linkUrl` takes priority over `info.pageUrl`. Title is empty for link URLs (correct — we don't have the linked page's title).
-
-### Edge 6: Duplicate capture upgrade (live → manual)
-
-**Status:** VERIFIED
-
-Test `storage.test.ts:209-228` verifies that if a URL was already captured today as `live`, calling `saveManualCapture` upgrades the source to `manual` without creating a duplicate entry.
-
-### Edge 7: Tab parameter undefined in context menu handler
-
-**Status:** VERIFIED (code inspection)
-
-`handleContextMenuClick` declares `tab?: chrome.tabs.Tab` (optional). Line 204 uses `tab?.title` with optional chaining. If Chrome doesn't provide the tab parameter, the title defaults to `''`.
+| Edge Case | Test | Result |
+|---|---|---|
+| Non-http URL via context menu (`chrome://`) | `ignores non-http URLs` | VERIFIED — silently dropped |
+| No active tab for keyboard shortcut | `does nothing when no active tab exists` | VERIFIED — returns false |
+| Non-http active tab for shortcut (`chrome://settings`) | `does nothing when active tab has no http URL` | VERIFIED — returns false |
+| Unrelated keyboard command | `ignores unrelated commands` | VERIFIED — returns immediately |
+| Right-click on link (link URL vs page URL) | `captures the link URL when right-clicking a link` | VERIFIED — linkUrl takes priority |
+| Manual capture on blocked domain | `captures on blocked domains (bypasses blocklist)` | VERIFIED — saves with source=manual |
+| Duplicate capture upgrade (live → manual) | `storage.test.ts` dedup tests | VERIFIED — upgrades source, no duplicate |
 
 ---
 
 ## Observations (non-blocking)
 
-### Context menu creation on service worker restart
-
-The `contextMenus.create()` call at `background.ts:271-275` is in the main `defineBackground` body, which runs on every service worker initialization. Chrome context menus persist across service worker restarts. Calling `create()` with an existing ID produces a "duplicate id" error.
-
-**Impact:** LOW — The context menu still works (the original persists). The error is an uncaught promise rejection that produces console noise but doesn't break functionality. Standard mitigations: call `contextMenus.removeAll()` before `create`, or move creation to `onInstalled`.
-
-**Not counted as a test failure** because the feature works correctly on first install and the error on restart doesn't affect behavior.
-
----
-
-## Test Coverage Summary
-
-| Feature | Tests | Edge Cases | Blocklist Bypass |
-|---|---|---|---|
-| Context menu (page) | ✓ | Non-http URLs, undefined tab | ✓ Verified |
-| Context menu (link) | ✓ | Link URL priority | ✓ Verified |
-| Keyboard shortcut | ✓ | No tab, non-http tab, wrong command | ✓ Verified |
-| Manual capture storage | ✓ | Dedup upgrade (live→manual, backfill→manual) | ✓ Verified |
-| Popup button | ✓ (pre-existing) | — | ✓ Verified |
-
----
-
-## Limitations
-
-This is a browser extension project. The tests exercise the handler functions in isolation using mocked Chrome APIs. The following cannot be verified from the CLI:
-
-- Actual context menu appearance in the browser
-- Keyboard shortcut registration and conflict detection in the browser
-- End-to-end flow with real `chrome.storage.local`
-- Visual feedback to the user after capture
-
-These require manual browser testing with the extension loaded unpacked.
+1. **Context menu creation location:** `contextMenus.create()` is called at service worker init (`background.ts:272`) rather than inside `onInstalled` as the strategy recommended. This can produce a harmless "duplicate ID" console error on SW restart. Not a regression (same pattern as cycle 1), and Chrome handles the duplicate silently — the context menu still works.
 
 ---
 
 ## Adversarial Verdict: **PASS**
 
-All acceptance criteria are verified with evidence. The implementation is correct, edge cases are covered, and no regressions were introduced (0 new TS errors, all 166 tests pass). The context menu creation pattern observation is non-blocking.
+All 4 acceptance criteria verified with command output evidence:
+- 166/166 tests pass via `npx vitest run` from project root
+- 0 TypeScript errors across all 3 workspaces
+- `npm test` passes cleanly
+- No regressions in existing extension functionality
+- Eval `tests` dimension moved from 0.0 to 1.0, unblocking the factory precheck gate

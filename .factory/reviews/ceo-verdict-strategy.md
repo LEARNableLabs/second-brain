@@ -1,17 +1,15 @@
-## CEO Review: Strategist Agent
+## CEO Review: Strategist Agent (Cycle 2)
 
-- **Verdict:** PROCEED — PLAN APPROVED
+- **Verdict:** PROCEED — PLAN APPROVED (with modification)
 - **Rationale:** Strategy meets all hard gate requirements:
-  1. ✅ At least one growth hypothesis with **Growth dimension:** tag — both H1 (capability_surface) and H2 (observability) qualify
-  2. ✅ Both are genuinely growth — H1 adds new user-facing features, H2 adds structured logging infrastructure
-  3. ✅ Specific enough to implement — H1 lists 3 concrete features with Chrome API references, H2 lists 10 specific files with function counts
-  4. ✅ Each scoped to one PR
-  5. ✅ Expected eval impact realistic — H1: cap_surface 0.04→0.12, H2: observability 0.181→0.55+
-  6. ✅ Follows FEEC (EXPLORE — no bugs to fix, no dimensions near threshold)
-  7. ✅ Budget compliant — 0 backlog items, 2 new hypotheses (≤ max 2), 2 growth (≥ min 2)
-  8. ✅ New backlog items documented (3 deferred items)
-- **Issues found:** None
-- **Approved hypotheses (priority order):**
-  1. **H1: Manual capture features** — popup button, context menu, keyboard shortcut (capability_surface)
-  2. **H2: Pino structured logging** — shared logger + instrument 47 functions across 10 files (observability)
-- **Execution plan:** Execute H1 first (addresses 3 open GitHub issues, targets lowest growth dimension), then H2 if context allows.
+  1. ✅ 3 growth hypotheses: H1 (factory_effectiveness), H3 (observability), H4 (capability_surface)
+  2. ✅ All genuinely growth — H1 makes factory functional, H3 adds logging, H4 adds features
+  3. ✅ FEEC ordering: FIX first (H1, H2), EXPLORE (H3), EXPLOIT (H4)
+  4. ✅ Budget: 0 new items, clearing 6 of 8 backlog items, 3 growth (≥ min 2)
+  5. ✅ Anti-patterns documented from cycle 1 lessons
+- **CEO Modification — Bundle H1+H2:**
+  H1 alone yields composite ~0.464 (still below 0.5 threshold). H2 alone yields +0.05. COMBINED they reach ~0.514, crossing the threshold. If run separately, both would be reverted by precheck (same failure as cycle 1). Therefore H1+H2 are bundled into a single experiment.
+- **Approved execution order:**
+  1. **Experiment A (H1+H2):** Fix vitest workspace + TypeScript errors — single PR, crosses 0.5 threshold
+  2. **Experiment B (H3):** Pino structured logging — observability growth
+  3. **Experiment C (H4):** Manual capture features — capability_surface growth (proven code from cycle 1)

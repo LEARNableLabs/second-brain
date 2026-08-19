@@ -1,33 +1,33 @@
 {
-  "total": 0.30843,
+  "total": 0.5346275,
   "results": [
     {
       "name": "tests",
-      "score": 0.0,
+      "score": 1.0,
       "weight": 0.155,
-      "passed": false,
-      "details": "(js): 0 passed, 19 failed"
+      "passed": true,
+      "details": "run-e5719851(js): 19 passed, 0 failed; extension(js): 7 passed, 0 failed; pipeline(js): 10 passed, 0 failed; shared(js): 2 passed, 0 failed"
     },
     {
       "name": "lint",
       "score": 0.6,
       "weight": 0.075,
       "passed": false,
-      "details": "(js): 1 errors; extension(js): 1 errors; pipeline(js): 1 errors; shared(js): 1 errors"
+      "details": "run-e5719851(js): 1 errors; extension(js): 1 errors; pipeline(js): 1 errors; shared(js): 1 errors"
     },
     {
       "name": "type_check",
-      "score": 0.0,
+      "score": 0.95,
       "weight": 0.05,
       "passed": false,
-      "details": "(ts): 1 errors; extension(ts): 33 errors; pipeline(ts): 12 errors; shared(ts): clean"
+      "details": "run-e5719851(ts): 1 errors; extension(ts): clean; pipeline(ts): clean; shared(ts): clean"
     },
     {
       "name": "coverage",
-      "score": 0.5,
+      "score": 0.6903,
       "weight": 0.125,
-      "passed": true,
-      "details": "Not detected: no coverage tool detected"
+      "passed": false,
+      "details": "Coverage: run-e5719851(js): 57%, extension(js): 34%, pipeline(js): 85%, shared(js): 100% (threshold: 80%)"
     },
     {
       "name": "config_parser",
@@ -55,11 +55,11 @@
       "score": 0.5,
       "weight": 0.1,
       "passed": true,
-      "details": "Only 0 experiments, too few to judge"
+      "details": "Only 1 experiments, too few to judge"
     },
     {
       "name": "observability",
-      "score": 0.177,
+      "score": 0.176,
       "weight": 0.09,
       "passed": false,
       "details": "observability_score=0.18, function_coverage=0.19, structured_logging=False"
@@ -69,14 +69,14 @@
       "score": 0.0,
       "weight": 0.07,
       "passed": false,
-      "details": "sources=0 (archive), utilization=0.00, research_report=no, doc_ratio=0.00 (0/1), citation_ratio=0.00"
+      "details": "sources=0 (archive), utilization=0.00, research_report=no, doc_ratio=0.00 (0/2), citation_ratio=0.00"
     },
     {
       "name": "factory_effectiveness",
       "score": 0.5,
       "weight": 0.065,
       "passed": true,
-      "details": "Only 0 experiments, too few to judge"
+      "details": "Only 1 experiments, too few to judge"
     },
     {
       "name": "spec_compliance",
@@ -87,5 +87,5 @@
     }
   ],
   "guard_violations": [],
-  "passed": false
+  "passed": true
 }

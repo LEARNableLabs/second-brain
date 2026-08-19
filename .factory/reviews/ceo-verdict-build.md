@@ -1,11 +1,18 @@
-## CEO Review: Builder Agent (H1: Manual Capture Features)
+## CEO Review: Builder Agent (Experiment A: H1+H2)
 
 - **Verdict:** PROCEED
-- **Rationale:** Builder implemented exactly what H1 described with no scope creep. Changes are focused (4 extension files), follow existing patterns, and include tests.
-- **Changes reviewed:**
-  1. `extension/entrypoints/background.ts` (+59 lines): Added `captureActiveTab()` helper, `handleContextMenuClick()`, `handleCommand()`. Context menu registered with `browser.contextMenus.create()`, keyboard handler via `browser.commands.onCommand`. Both use existing `saveManualCapture` from storage.
-  2. `extension/tests/manual-capture.test.ts` (182 lines): 8 new tests — 4 for context menu (page URL, link URL, non-HTTP ignore, blocked domain bypass), 4 for keyboard shortcut (capture, wrong command, non-HTTP, no tab).
-  3. `extension/wxt.config.ts`: Added `contextMenus` permission and `commands` section with `save-current-page` shortcut (Cmd+Shift+S / Ctrl+Shift+S).
-  4. `extension/tests/setup.ts`: Added `defineBackground` global for test compatibility.
-- **Issues found:** None — work matches hypothesis exactly, popup button already existed (correctly identified by Builder).
-- **Instructions for next step:** Proceed to deep-QA pipeline (Health Checker + Code Reviewer + Adversarial Tester in parallel).
+- **Rationale:** Both parts implemented correctly, verified.
+- **H1 (vitest workspace):** Created `vitest.config.ts` at root with `test.projects` referencing all 3 workspaces. Result: `npx vitest run` from root now passes ALL 19 test files, ALL 166 tests (was 9 failed / 10 passed before).
+- **H2 (TypeScript errors):** Fixed all 46 errors across all workspaces. Extension: 0 errors (was 33), Pipeline: 0 errors (was 12), Shared: 0 errors (was 0). Changes include: @types/chrome installed, type shims added, test mock types fixed, tsconfig updated.
+- **Files changed:** 25 files (some .factory/ metadata), key source changes:
+  - `vitest.config.ts` (new, root)
+  - `extension/entrypoints/background.ts` (+26 lines — type fixes)
+  - `extension/entrypoints/wxt-shims.d.ts` (new type shim)
+  - `extension/package.json` (@types/chrome added)
+  - `extension/tests/background.test.ts` (mock type fixes)
+  - `extension/tests/manual-capture.test.ts` (mock type fixes)
+  - `extension/tsconfig.json` (types config)
+  - `pipeline/src/types/modules.d.ts` (module declarations)
+  - `pipeline/tsconfig.json` (types config)
+- **Issues found:** None — changes match hypothesis, no scope creep.
+- **Instructions for next step:** Proceed to deep-QA pipeline.

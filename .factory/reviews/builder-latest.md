@@ -1,20 +1,16 @@
 # Builder Agent Output
 
-- **timestamp:** 2026-08-19T18:41:05Z
+- **timestamp:** 2026-08-19T20:04:54Z
 - **exit_code:** 0
 
 ---
 
-Implementation complete. Here's the summary:
+Done. Here's the summary:
 
-**PR:** https://github.com/LEARNableLabs/second-brain/pull/12
-
-**What was built:**
-1. **Popup button (#6)** — already existed in the codebase, fully wired to `saveManualCapture`
-2. **Context menu (#7)** — "Save to Second Brain" right-click menu on pages and links, captures via `saveManualCapture` bypassing blocklist
-3. **Keyboard shortcut (#8)** — `Cmd+Shift+S` (Mac) / `Ctrl+Shift+S` (Windows) captures the active tab
-
-**4 files changed**, 8 new tests added, all 166 tests pass. Builder review written to `.factory/reviews/builder-latest.md`.
+- **Root cause:** Factory's test runner detection requires `vitest` as an explicit key in root `package.json` devDependencies. Only `@vitest/coverage-v8` was present, so it fell back to jest (which can't parse TypeScript).
+- **Fix:** Added `"vitest": "^4.1.11"` to root devDependencies (commit `00ca03e`).
+- **Verified:** Factory detects vitest correctly, all 19 test files / 166 tests pass with coverage.
+- **PR #12** updated: https://github.com/LEARNableLabs/second-brain/pull/12
 ---
 
 > **⚠ CEO IDENTITY RE-ANCHOR (Sacred Rule 8)**

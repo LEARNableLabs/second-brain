@@ -1,0 +1,311 @@
+{
+  "project_name": "run-e5719851",
+  "generated_at": "2026-08-19 14:47:38.300877",
+  "total_experiments": 1,
+  "keep_count": 0,
+  "revert_count": 1,
+  "error_count": 0,
+  "keep_rate": 0.0,
+  "latest_score": null,
+  "agent_verdicts": [
+    {
+      "role": "build",
+      "verdict": "PROCEED",
+      "rationale": "Builder implemented exactly what H1 described with no scope creep. Changes are focused (4 extension files), follow existing patterns, and include tests.",
+      "issues": [
+        "None \u2014 work matches hypothesis exactly, popup button already existed (correctly identified by Builder).",
+        "**Instructions for next step:** Proceed to deep-QA pipeline (Health Checker + Code Reviewer + Adversarial Tester in parallel)."
+      ],
+      "experiment_id": null
+    },
+    {
+      "role": "discover",
+      "verdict": "PROCEED",
+      "rationale": "Discovery produced a valid eval_profile.json and eval/score.py with 2 dimensions (tests at 0.83 weight, observability at 0.17 weight). The `tests` dimension correctly uses `npm test` which aligns with the project's vitest setup. The auto-discovery is acceptable as a starting point \u2014 the Review step will test the harness and fix broken dimensions.",
+      "issues": [
+        "1. **Critical: observability eval scans only .py files** \u2014 uses Python's `ast.parse` and globs `*.py`, but this is a TypeScript project. Will always report \"No functions found\" with score 0.0. Must be fixed in Review step.",
+        "2. **Missing dimensions:** No type_check (project has tsconfig.json), no lint, no coverage \u2014 all relevant for a TypeScript monorepo.",
+        "3. **Project type misidentified** as `cli_tool` \u2014 it's a multi-component system (pipeline + browser extension + shared lib).",
+        "4. **Weights are lopsided** \u2014 tests at 83% is too dominant for a 2-dimension profile.",
+        "**Instructions for next step:** Re-detect project state to transition to evals_pending_review. During Review, the Builder must fix the observability eval to scan .ts/.tsx files and consider adding type_check and lint dimensions."
+      ],
+      "experiment_id": null
+    },
+    {
+      "role": "doc-freshness",
+      "verdict": "PROCEED",
+      "rationale": "The changes add new browser extension features (context menu, keyboard shortcut) but do not change any public API, CLI commands, or configuration options that would require doc updates. The manifest changes (new permission, new command) are self-documented in the manifest itself. No README/CLAUDE.md/doc changes needed.",
+      "issues": [],
+      "experiment_id": null
+    },
+    {
+      "role": "e2e",
+      "verdict": "PROCEED",
+      "rationale": "The project runs end-to-end successfully.",
+      "issues": [
+        "None \u2014 project is ready to transition to Improve mode",
+        "**Instructions for next step:** Proceed to Improve mode. Priority targets: fix factory eval test dimension (it reports 0 despite npm test passing), improve type_check, and add real capabilities (growth dimensions)."
+      ],
+      "experiment_id": null
+    },
+    {
+      "role": "eval",
+      "verdict": "PROCEED",
+      "rationale": "Both eval dimensions now produce valid scores after Builder fixes.",
+      "issues": [
+        "None \u2014 Builder correctly installed webextension-polyfill and rewrote observability eval for TypeScript scanning.",
+        "**Instructions for next step:** Mark eval profile as reviewed, then proceed to create factory.md and initialize the factory."
+      ],
+      "experiment_id": null
+    },
+    {
+      "role": "qa",
+      "verdict": "PROCEED",
+      "rationale": "All 3 QA agents passed clean.",
+      "issues": [
+        "capability_surface didn't improve in factory meta-eval (still 0.04) \u2014 the meta-eval likely doesn't detect Chrome extension APIs as surface area. The actual features (context menu, keyboard shortcut) are correctly implemented.",
+        "**Instructions for next step:** Run precheck gate, then finalize with keep verdict."
+      ],
+      "experiment_id": null
+    },
+    {
+      "role": "research",
+      "verdict": "PROCEED",
+      "rationale": "Research is thorough, well-sourced, and actionable. All 5 requested areas covered with depth. Key findings are grounded in actual project analysis and external research.",
+      "issues": [
+        "None significant. Minor note: the \"hours\" estimates are effort estimates, not calendar commitments \u2014 acceptable.",
+        "**Key findings to pass to Strategist:**",
+        "1. **Tests eval discrepancy:** Factory meta-eval uses different dimension scoring than project eval/score.py. The 12-dimension factory eval shows tests=0 despite npm test passing \u2014 likely a working directory or test runner mismatch.",
+        "2. **TypeScript errors are fixable:** 24 extension errors, mostly TS2503 (missing @types/chrome) and TS2353 (wrong mock properties). WxtVitest plugin would eliminate most.",
+        "3. **Manual capture features (#6-#8) are highest-impact growth:** capability_surface jumps from 4\u219212 (+200%), low implementation cost.",
+        "4. **Pino structured logging is the right choice:** 5-8x faster than Winston, minimal bundle size, structured JSON by default.",
+        "5. **@webext-core/fake-browser with WxtVitest plugin** is the modern standard for browser extension testing.",
+        "**Instructions for next step:** Strategist should generate hypotheses targeting: (a) at least one growth hypothesis for capability_surface (manual capture features), (b) one growth hypothesis for observability (structured logging), balanced with hygiene fixes (type_check errors). Budget: 0 backlog items, max 2 new hypotheses, min 2 growth."
+      ],
+      "experiment_id": null
+    },
+    {
+      "role": "strategy",
+      "verdict": "PROCEED",
+      "rationale": "Strategy meets all hard gate requirements:",
+      "issues": [
+        "None",
+        "**Approved hypotheses (priority order):**",
+        "1. **H1: Manual capture features** \u2014 popup button, context menu, keyboard shortcut (capability_surface)",
+        "2. **H2: Pino structured logging** \u2014 shared logger + instrument 47 functions across 10 files (observability)",
+        "**Execution plan:** Execute H1 first (addresses 3 open GitHub issues, targets lowest growth dimension), then H2 if context allows."
+      ],
+      "experiment_id": null
+    }
+  ],
+  "observations": [
+    {
+      "source": "observations.md",
+      "content": "# Interaction Study \u2014: Analyzed 3 conversation log(s), 9 relevant messages.",
+      "timestamp": "2026-08-19 14:47:38.300379",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "User Messages (3): - Fix two issues to make the eval harness work:\n\n1. INSTALL MISSING DEPENDENCY: The extension workspace tests fail because 'webextension-polyfill' is not installed. Run: cd extension && npm install webe\n- Create factory.md from template. Copy the factory config template to the project root. Fill in:\n\nProject: Second Brain \u2014 an automated knowledge capture system that passively logs browsing history and \n- Project: /Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851\nMode: di",
+      "timestamp": "2026-08-19 14:47:38.300389",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Branch Override: Target branch for all PRs and merges: `main`\nThe Builder should create experimen",
+      "timestamp": "2026-08-19 14:47:38.300392",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Errors and Issues (6): - All 158 tests pass across all 3 workspaces. Now let me fix `eval_observability()` to scan TypeScript files instead of Python files.\n- No matching issue for this eval harness fix. Let me create one, then commit and open a PR.\n- Done. Both fixes are in place and verified:\n- Root cause identified: extension tests fail because `webextension-polyfill` isn't installed, and the observability eval only scans `.py` files. I'll dispatch the Builder to fix both issues.\n- Dispatching the Builder to fix th",
+      "timestamp": "2026-08-19 14:47:38.300394",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Similar Projects: - [PREMPATIL19/velvet](https://github.com/PREMPATIL19/velvet) (0 stars) \u2014 <div align=\"center\">  <img src=\"/assets/logo.png\" width=\"150\" height=\"150\" />  # Velvet  Velvet is a lightweight tool designed for seamless project management and collaboration. \ud83c\udf1f Join us in building \n- [Dzodah8772/ArchFlux](https://github.com/Dzodah8772/ArchFlux) (0 stars) \u2014 <p align=\"center\">   <img src=\"assets/logo.png\" width=\"180\" alt=\"ArchFlux Logo\"> </p>  <h1 align=\"center\">ArchFlux BSPWM + i3 Live ISO</h1>  <p align",
+      "timestamp": "2026-08-19 14:47:38.300397",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "SPEC: No SPEC.md found. Run 'factory spec generate <path>' to generate one.",
+      "timestamp": "2026-08-19 14:47:38.300399",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Open GitHub Issues: ### Your Issues (6) \u2014 actionable, may generate fix hypotheses\n\n- **#11** Fix eval harness: install missing dependency and rewrite observability eval for TypeScript (by @georgosgeorgos)\n  > ## Problem  The eval harness has two issues preventing meaningful scoring:  1. **Tests fail**: `npm test` exits 1 because `webextension-polyfill` is not installed in the extension workspace 2. **Observability scores 0**: `eval_observability()` scans only `*.py` files using Python's `ast` module, but\n- **#10** ",
+      "timestamp": "2026-08-19 14:47:38.300405",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Backlog: Backlog is empty. Focus on new improvements and hygiene.",
+      "timestamp": "2026-08-19 14:47:38.300407",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Observability Coverage: - **Score:** 18.1%\n- **Function coverage:** 26/132 functions have logging (20%)\n- **Total log statements:** 90\n- **Structured logging:** No\n- **Request tracing:** No\n\n### Uninstrumented Files\n- extension/components/history-backfill.ts (4 functions, 0 log statements)\n- extension/components/storage.ts (13 functions, 0 log statements)\n- pipeline/src/ai/vault-scanner.ts (4 functions, 0 log statements)\n- pipeline/src/ai/provider.ts (4 functions, 0 log statements)\n- pipeline/src/ai/curate.ts (3 functi",
+      "timestamp": "2026-08-19 14:47:38.300410",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Prior Knowledge (Obsidian): No prior notes found.",
+      "timestamp": "2026-08-19 14:47:38.300411",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Hypothesis Budget: **Backlog items: 0** (clear as many as possible this cycle)\n**New items: at most 2** (researcher/strategist may add new ideas)\n**Growth minimum: 2** (at least 2 hypotheses must target growth dimensions)\n\n### Rules\n\n- Read the backlog first. Pick items to implement this cycle \u2014 no cap on clearing.\n- You may add at most 2 NEW items that aren't already in the backlog.\n- At least 2 hypotheses must target growth dimensions (capability_surface, factory_effectiveness, research_grounding, experiment_div",
+      "timestamp": "2026-08-19 14:47:38.300415",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Episodic Memory (Task-Relevant): No results found for: \"/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851\"",
+      "timestamp": "2026-08-19 14:47:38.300416",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Past QA Findings: No results found for: \"code review issues findings\"",
+      "timestamp": "2026-08-19 14:47:38.300418",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Design Rationale: No results found for: \"decision rationale tradeoff\"",
+      "timestamp": "2026-08-19 14:47:38.300419",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Anti-Patterns & Past Failures: No results found for: \"failed reverted broken\"",
+      "timestamp": "2026-08-19 14:47:38.300420",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Experiment Outcomes: No results found for: \"experiment verdict keep revert\"",
+      "timestamp": "2026-08-19 14:47:38.300422",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": ".factory/archive/experiment-001.md",
+      "content": "---\ntags: [factory, experiment, second-brain]\nproject: second-brain\nexperiment_id: 001\nverdict: revert\nscore_delta: +0.002\ndate: 2026-08-19\nsource: factory-archivist\n---\n\n# Experiment #001: Add manual capture features\n\n## Result\n**REVERT** \u2014 Score improved from 0.306 to 0.308 (+0.002), all tests pass (166/166), zero QA violations. Force-reverted by precheck gate because composite score 0.308 < threshold 0.5. This is a pre-existing condition, not a regression.\n\n## What Changed\nImplemented three m",
+      "timestamp": "2026-08-19 14:47:38.300625",
+      "project": "run-e5719851",
+      "tags": [
+        "archive"
+      ]
+    },
+    {
+      "source": ".factory/archive/memory/context.md",
+      "content": "## Episodic Memory (Task-Relevant)\n\n  No results found for: \"/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851\"\n\n\n## Past QA Findings\n\n  No results found for: \"code review issues findings\"\n\n\n## Design Rationale\n\n  No results found for: \"decision rationale tradeoff\"\n\n\n## Anti-Patterns & Past Failures\n\n  No results found for: \"failed reverted broken\"\n\n\n## Knowledge Graph Facts\n\n\n## Timeline\n\n\n## Experiment Outcomes\n\n  No results found for: \"experiment verdict keep revert\"\n",
+      "timestamp": "2026-08-19 14:47:38.300690",
+      "project": "run-e5719851",
+      "tags": [
+        "archive"
+      ]
+    },
+    {
+      "source": ".factory/archive/memory/decisions.md",
+      "content": "\n  No results found for: \"decision rationale tradeoff\"\n",
+      "timestamp": "2026-08-19 14:47:38.300725",
+      "project": "run-e5719851",
+      "tags": [
+        "archive"
+      ]
+    },
+    {
+      "source": ".factory/archive/memory/episodes.md",
+      "content": "\n  No results found for: \"/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851\"\n",
+      "timestamp": "2026-08-19 14:47:38.300758",
+      "project": "run-e5719851",
+      "tags": [
+        "archive"
+      ]
+    },
+    {
+      "source": ".factory/archive/memory/outcomes.md",
+      "content": "\n  No results found for: \"experiment verdict keep revert\"\n",
+      "timestamp": "2026-08-19 14:47:38.300813",
+      "project": "run-e5719851",
+      "tags": [
+        "archive"
+      ]
+    },
+    {
+      "source": ".factory/archive/memory/reviews.md",
+      "content": "\n  No results found for: \"code review issues findings\"\n",
+      "timestamp": "2026-08-19 14:47:38.300845",
+      "project": "run-e5719851",
+      "tags": [
+        "archive"
+      ]
+    }
+  ],
+  "verdict_patterns": {
+    "build:PROCEED": 1,
+    "discover:PROCEED": 1,
+    "doc-freshness:PROCEED": 1,
+    "e2e:PROCEED": 1,
+    "eval:PROCEED": 1,
+    "qa:PROCEED": 1,
+    "research:PROCEED": 1,
+    "strategy:PROCEED": 1
+  }
+}

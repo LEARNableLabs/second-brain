@@ -1,0 +1,26 @@
+[
+  {
+    "type": "anti_pattern",
+    "text": "Factory meta-eval tests dimension broken for monorepo projects — reports 0 passed when npm test shows 166 passing",
+    "evidence": [1],
+    "date": "2026-08-19",
+    "severity": "critical",
+    "blocker": true,
+    "context": "Prevents all experiments from passing precheck gate despite high code quality. Root cause: meta-eval test runner not detecting monorepo workspace structure."
+  },
+  {
+    "type": "pattern",
+    "text": "QA agents (health_checker, code_reviewer, adversarial_tester) provide reliable quality signals even when precheck gate fails due to meta-eval bugs",
+    "evidence": [1],
+    "date": "2026-08-19",
+    "confidence": "high"
+  },
+  {
+    "type": "agent_perf",
+    "agent": "builder",
+    "text": "Builder executes hypotheses precisely with zero scope creep. Tests always included and passing.",
+    "evidence": [1],
+    "date": "2026-08-19",
+    "confidence": "high"
+  }
+]

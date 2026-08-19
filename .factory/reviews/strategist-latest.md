@@ -1,16 +1,19 @@
 # Strategist Agent Output
 
-- **timestamp:** 2026-08-19T18:35:20Z
+- **timestamp:** 2026-08-19T19:35:52Z
 - **exit_code:** 0
 
 ---
 
-Strategy written to `.factory/strategy/current.md` with 2 hypotheses, both targeting growth dimensions:
+Strategy written to `.factory/strategy/current.md` with 4 hypotheses clearing 6 of 8 backlog items (3 were duplicates).
 
-1. **H1: Manual capture features** (capability_surface) — popup button, context menu, keyboard shortcut from issues #6-#8. Expected impact: capability_surface 0.04 → 0.12.
-2. **H2: Pino structured logging** (observability) — shared logger module + instrument 47 uninstrumented functions across 10 files. Expected impact: observability 0.181 → 0.55+.
+**Summary:**
+- **H1 (FIX):** Create `vitest.workspace.ts` — unblocks the factory. tests 0.0 → 1.0 (+0.155 composite). Growth: factory_effectiveness.
+- **H2 (FIX):** Fix 46 TypeScript errors — type_check 0.0 → ~1.0 (+0.05). Combined with H1, crosses the 0.5 threshold.
+- **H3 (EXPLORE):** Pino structured logging — observability 0.177 → 0.55+. Growth: observability.
+- **H4 (EXPLOIT):** Re-attempt manual capture (proven code from cycle 1) — capability_surface 0.04 → 0.12. Growth: capability_surface.
 
-Three new backlog items deferred: factory meta-eval tests discrepancy, TypeScript strict mode errors, and dashboard features (#9-#10).
+3 growth hypotheses (H1 factory_effectiveness, H3 observability, H4 capability_surface), 0 new items added (all from backlog). Only the dashboard items remain deferred.
 ---
 
 > **⚠ CEO IDENTITY RE-ANCHOR (Sacred Rule 8)**

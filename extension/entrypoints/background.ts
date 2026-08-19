@@ -133,6 +133,13 @@ export async function handleInstall(
   details: Runtime.OnInstalledDetailsType
 ): Promise<void> {
   try {
+    // Register context menus once on install/update (not on every SW restart)
+    browser.contextMenus.create({
+      id: 'save-to-second-brain',
+      title: 'Save to Second Brain',
+      contexts: ['page', 'link'],
+    });
+
     if (details.reason === 'install') {
       // Load default blocklist from blocklist.json
       const blocklistConfig = await loadDefaultBlocklist();
@@ -275,12 +282,7 @@ export default defineBackground(() => {
   browser.runtime.onInstalled.addListener(handleInstall);
   browser.runtime.onStartup.addListener(handleStartup);
 
-  // Context menu: "Save to Second Brain"
-  browser.contextMenus.create({
-    id: 'save-to-second-brain',
-    title: 'Save to Second Brain',
-    contexts: ['page', 'link'],
-  });
+  // Context menu click handler (menu items registered in handleInstall)
   browser.contextMenus.onClicked.addListener(handleContextMenuClick);
 
   // Keyboard shortcut handler

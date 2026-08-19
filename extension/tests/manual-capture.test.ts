@@ -43,6 +43,7 @@ const mockStorageAPI = {
   onMessage: { addListener: vi.fn() },
 };
 
+import type { Menus, Tabs } from 'webextension-polyfill';
 import { handleContextMenuClick, handleCommand } from '../entrypoints/background';
 import { getToday } from '../components/storage';
 
@@ -68,8 +69,8 @@ describe('context menu capture', () => {
     const info = {
       menuItemId: 'save-to-second-brain',
       pageUrl: 'https://example.com/article',
-    } as chrome.contextMenus.OnClickData;
-    const tab = { id: 1, url: 'https://example.com/article', title: 'Article' } as chrome.tabs.Tab;
+    } as Menus.OnClickData;
+    const tab = { id: 1, url: 'https://example.com/article', title: 'Article' } as Tabs.Tab;
 
     await handleContextMenuClick(info, tab);
 
@@ -85,8 +86,8 @@ describe('context menu capture', () => {
       menuItemId: 'save-to-second-brain',
       linkUrl: 'https://linked-site.com/page',
       pageUrl: 'https://example.com',
-    } as chrome.contextMenus.OnClickData;
-    const tab = { id: 1, url: 'https://example.com', title: 'Example' } as chrome.tabs.Tab;
+    } as Menus.OnClickData;
+    const tab = { id: 1, url: 'https://example.com', title: 'Example' } as Tabs.Tab;
 
     await handleContextMenuClick(info, tab);
 
@@ -100,7 +101,7 @@ describe('context menu capture', () => {
     const info = {
       menuItemId: 'save-to-second-brain',
       pageUrl: 'chrome://extensions/',
-    } as chrome.contextMenus.OnClickData;
+    } as Menus.OnClickData;
 
     await handleContextMenuClick(info);
 
@@ -111,8 +112,8 @@ describe('context menu capture', () => {
     const info = {
       menuItemId: 'save-to-second-brain',
       pageUrl: 'https://gmail.com/inbox',
-    } as chrome.contextMenus.OnClickData;
-    const tab = { id: 1, url: 'https://gmail.com/inbox', title: 'Gmail' } as chrome.tabs.Tab;
+    } as Menus.OnClickData;
+    const tab = { id: 1, url: 'https://gmail.com/inbox', title: 'Gmail' } as Tabs.Tab;
 
     await handleContextMenuClick(info, tab);
 

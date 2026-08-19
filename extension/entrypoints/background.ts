@@ -1,4 +1,5 @@
 import browser from 'webextension-polyfill';
+import type { WebNavigation, Tabs, Runtime, Menus } from 'webextension-polyfill';
 import { startTracking, cancelTracking } from '../components/dwell-tracker';
 import { loadBlocklist, isBlocked, loadDefaultBlocklist, flattenBlocklist } from '../components/blocklist';
 import { detectGap, backfillHistory } from '../components/history-backfill';
@@ -25,7 +26,7 @@ import type { CaptureEntry } from '../components/types';
  * Start dwell tracking for qualifying pages
  */
 export async function handlePageLoad(
-  details: chrome.webNavigation.WebNavigationFramedCallbackDetails
+  details: WebNavigation.OnCompletedDetailsType
 ): Promise<void> {
   // Only process main frame (not iframes)
   if (details.frameId !== 0) return;
@@ -72,7 +73,7 @@ export async function handlePageLoad(
  * D-13: Track dwell when user focuses a tab
  */
 export async function handleTabActivated(
-  activeInfo: chrome.tabs.TabActiveInfo
+  activeInfo: Tabs.OnActivatedActiveInfoType
 ): Promise<void> {
   try {
     // Load pause state
@@ -110,7 +111,7 @@ export async function handleTabActivated(
  */
 export async function handleTabRemoved(
   tabId: number,
-  removeInfo: chrome.tabs.TabRemoveInfo
+  _removeInfo: Tabs.OnRemovedRemoveInfoType
 ): Promise<void> {
   try {
     // Cancel any pending dwell tracking for this tab
@@ -126,7 +127,7 @@ export async function handleTabRemoved(
  * Backfill history on extension update
  */
 export async function handleInstall(
-  details: chrome.runtime.InstalledDetails
+  details: Runtime.OnInstalledDetailsType
 ): Promise<void> {
   try {
     if (details.reason === 'install') {
@@ -192,8 +193,8 @@ async function captureActiveTab(): Promise<boolean> {
  * Handle context menu click — save the target page or link URL.
  */
 export async function handleContextMenuClick(
-  info: chrome.contextMenus.OnClickData,
-  tab?: chrome.tabs.Tab
+  info: Menus.OnClickData,
+  tab?: Tabs.Tab
 ): Promise<void> {
   try {
     const targetUrl = info.linkUrl || info.pageUrl;
@@ -281,13 +282,14 @@ export default defineBackground(() => {
   // Handle messages from native messaging host (Phase 2: Data Export Pipeline)
   // The CLI triggers export by launching the native host, which sends a message to the extension.
   // Extension responds with current captures from chrome.storage.
-  browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.action === 'getCaptures') {
-      handleGetCaptures().then(sendResponse).catch(err => {
+  browser.runtime.onMessage.addListener(async (message: unknown) => {
+    if ((message as { action?: string }).action === 'getCaptures') {
+      try {
+        return await handleGetCaptures();
+      } catch (err) {
         console.error('Error handling getCaptures:', err);
-        sendResponse({ error: String(err) });
-      });
-      return true; // Indicates async response
+        return { error: String(err) };
+      }
     }
   });
 

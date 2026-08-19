@@ -2,7 +2,7 @@ import browser from 'webextension-polyfill';
 import { startTracking, cancelTracking } from '../components/dwell-tracker';
 import { loadBlocklist, isBlocked, loadDefaultBlocklist, flattenBlocklist } from '../components/blocklist';
 import { detectGap, backfillHistory } from '../components/history-backfill';
-import { loadStorage, saveStorage } from '../components/storage';
+import { loadStorage, saveStorage, saveManualCapture } from '../components/storage';
 import type { CaptureEntry } from '../components/types';
 
 /**
@@ -175,6 +175,52 @@ export async function handleStartup(): Promise<void> {
 }
 
 /**
+ * Capture the active tab as a manual save, bypassing the blocklist.
+ * Shared by context menu and keyboard shortcut handlers.
+ */
+async function captureActiveTab(): Promise<boolean> {
+  const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+  const tab = tabs[0];
+  if (!tab?.url || (!tab.url.startsWith('http://') && !tab.url.startsWith('https://'))) {
+    return false;
+  }
+  const url = new URL(tab.url);
+  return saveManualCapture(tab.url, tab.title || '', url.hostname);
+}
+
+/**
+ * Handle context menu click — save the target page or link URL.
+ */
+export async function handleContextMenuClick(
+  info: chrome.contextMenus.OnClickData,
+  tab?: chrome.tabs.Tab
+): Promise<void> {
+  try {
+    const targetUrl = info.linkUrl || info.pageUrl;
+    if (!targetUrl || (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://'))) {
+      return;
+    }
+    const url = new URL(targetUrl);
+    const title = (info.linkUrl ? '' : tab?.title) || '';
+    await saveManualCapture(targetUrl, title, url.hostname);
+  } catch (error) {
+    console.error('Error in handleContextMenuClick:', error);
+  }
+}
+
+/**
+ * Handle keyboard shortcut command.
+ */
+export async function handleCommand(command: string): Promise<void> {
+  if (command !== 'save-current-page') return;
+  try {
+    await captureActiveTab();
+  } catch (error) {
+    console.error('Error in handleCommand:', error);
+  }
+}
+
+/**
  * Handle export request: return all captures from chrome.storage
  * D-03: Mark captures with exportedAt timestamp for 7-day retention tracking
  */
@@ -220,6 +266,17 @@ export default defineBackground(() => {
   browser.tabs.onRemoved.addListener(handleTabRemoved);
   browser.runtime.onInstalled.addListener(handleInstall);
   browser.runtime.onStartup.addListener(handleStartup);
+
+  // Context menu: "Save to Second Brain"
+  browser.contextMenus.create({
+    id: 'save-to-second-brain',
+    title: 'Save to Second Brain',
+    contexts: ['page', 'link'],
+  });
+  browser.contextMenus.onClicked.addListener(handleContextMenuClick);
+
+  // Keyboard shortcut handler
+  browser.commands.onCommand.addListener(handleCommand);
 
   // Handle messages from native messaging host (Phase 2: Data Export Pipeline)
   // The CLI triggers export by launching the native host, which sends a message to the extension.

@@ -5,6 +5,7 @@ import { fetchCommand } from './commands/fetch.js';
 import { curateCommand } from './commands/curate.js';
 import { captureConversationCommand } from './commands/capture-conversation.js';
 import { emailCommand } from './commands/email.js';
+import { searchCommand } from './commands/search.js';
 
 const program = new Command();
 
@@ -53,5 +54,16 @@ program
   .description('Send morning email digest of yesterday\'s highlights')
   .option('--date <YYYY-MM-DD>', 'Send digest for specific date (defaults to yesterday)')
   .action(emailCommand);
+
+program
+  .command('search <query>')
+  .description('Search captured pages and daily notes')
+  .option('--from <YYYY-MM-DD>', 'Only results from this date onward')
+  .option('--to <YYYY-MM-DD>', 'Only results up to this date')
+  .option('--domain <domain>', 'Filter to specific domain')
+  .option('--limit <n>', 'Max results per source (default 20)')
+  .option('--notes-only', 'Search only daily note files')
+  .option('--db-only', 'Search only the captures database')
+  .action(searchCommand);
 
 program.parse();

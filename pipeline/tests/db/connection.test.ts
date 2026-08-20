@@ -30,9 +30,9 @@ describe('Database Connection', () => {
   it('Test 3: migrate() applies all migrations and sets user_version', () => {
     const db = getDatabase();
     const result = migrate(db);
-    expect(result.applied).toBe(2);
-    expect(result.current).toBe(2);
-    expect(getSchemaVersion(db)).toBe(2);
+    expect(result.applied).toBe(3);
+    expect(result.current).toBe(3);
+    expect(getSchemaVersion(db)).toBe(3);
     closeDatabase(db);
   });
 
@@ -41,7 +41,7 @@ describe('Database Connection', () => {
     migrate(db);
     const secondRun = migrate(db);
     expect(secondRun.applied).toBe(0);
-    expect(secondRun.current).toBe(2);
+    expect(secondRun.current).toBe(3);
     closeDatabase(db);
   });
 

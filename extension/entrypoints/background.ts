@@ -1,9 +1,13 @@
 import browser from 'webextension-polyfill';
+import type { WebNavigation, Tabs, Runtime, Menus } from 'webextension-polyfill';
 import { startTracking, cancelTracking } from '../components/dwell-tracker';
 import { loadBlocklist, isBlocked, loadDefaultBlocklist, flattenBlocklist } from '../components/blocklist';
 import { detectGap, backfillHistory } from '../components/history-backfill';
-import { loadStorage, saveStorage } from '../components/storage';
+import { loadStorage, saveStorage, saveManualCapture } from '../components/storage';
+import { createModuleLogger } from '../components/logger';
 import type { CaptureEntry } from '../components/types';
+
+const logger = createModuleLogger('background');
 
 /**
  * Background Service Worker - Event-Driven Capture Engine
@@ -25,7 +29,7 @@ import type { CaptureEntry } from '../components/types';
  * Start dwell tracking for qualifying pages
  */
 export async function handlePageLoad(
-  details: chrome.webNavigation.WebNavigationFramedCallbackDetails
+  details: WebNavigation.OnCompletedDetailsType
 ): Promise<void> {
   // Only process main frame (not iframes)
   if (details.frameId !== 0) return;
@@ -72,7 +76,7 @@ export async function handlePageLoad(
  * D-13: Track dwell when user focuses a tab
  */
 export async function handleTabActivated(
-  activeInfo: chrome.tabs.TabActiveInfo
+  activeInfo: Tabs.OnActivatedActiveInfoType
 ): Promise<void> {
   try {
     // Load pause state
@@ -110,7 +114,7 @@ export async function handleTabActivated(
  */
 export async function handleTabRemoved(
   tabId: number,
-  removeInfo: chrome.tabs.TabRemoveInfo
+  _removeInfo: Tabs.OnRemovedRemoveInfoType
 ): Promise<void> {
   try {
     // Cancel any pending dwell tracking for this tab
@@ -126,9 +130,16 @@ export async function handleTabRemoved(
  * Backfill history on extension update
  */
 export async function handleInstall(
-  details: chrome.runtime.InstalledDetails
+  details: Runtime.OnInstalledDetailsType
 ): Promise<void> {
   try {
+    // Register context menus once on install/update (not on every SW restart)
+    browser.contextMenus.create({
+      id: 'save-to-second-brain',
+      title: 'Save to Second Brain',
+      contexts: ['page', 'link'],
+    });
+
     if (details.reason === 'install') {
       // Load default blocklist from blocklist.json
       const blocklistConfig = await loadDefaultBlocklist();
@@ -171,6 +182,56 @@ export async function handleStartup(): Promise<void> {
     }
   } catch (error) {
     console.error('Error in handleStartup:', error);
+  }
+}
+
+/**
+ * Capture the active tab as a manual save, bypassing the blocklist.
+ * Shared by context menu and keyboard shortcut handlers.
+ */
+async function captureActiveTab(): Promise<boolean> {
+  const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+  const tab = tabs[0];
+  if (!tab?.url || (!tab.url.startsWith('http://') && !tab.url.startsWith('https://'))) {
+    return false;
+  }
+  const url = new URL(tab.url);
+  return saveManualCapture(tab.url, tab.title || '', url.hostname);
+}
+
+/**
+ * Handle context menu click — save the target page or link URL.
+ */
+export async function handleContextMenuClick(
+  info: Menus.OnClickData,
+  tab?: Tabs.Tab
+): Promise<void> {
+  try {
+    const targetUrl = info.linkUrl || info.pageUrl;
+    if (!targetUrl || (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://'))) {
+      return;
+    }
+    const url = new URL(targetUrl);
+    const title = (info.linkUrl ? '' : tab?.title) || '';
+    await saveManualCapture(targetUrl, title, url.hostname);
+    logger.info({ url: targetUrl, source: 'context-menu' }, 'manual capture saved');
+  } catch (error) {
+    logger.error({ error: String(error) }, 'error in handleContextMenuClick');
+  }
+}
+
+/**
+ * Handle keyboard shortcut command.
+ */
+export async function handleCommand(command: string): Promise<void> {
+  if (command !== 'save-current-page') return;
+  try {
+    const saved = await captureActiveTab();
+    if (saved) {
+      logger.info({ source: 'keyboard-shortcut' }, 'manual capture saved');
+    }
+  } catch (error) {
+    logger.error({ error: String(error) }, 'error in handleCommand');
   }
 }
 
@@ -221,16 +282,23 @@ export default defineBackground(() => {
   browser.runtime.onInstalled.addListener(handleInstall);
   browser.runtime.onStartup.addListener(handleStartup);
 
+  // Context menu click handler (menu items registered in handleInstall)
+  browser.contextMenus.onClicked.addListener(handleContextMenuClick);
+
+  // Keyboard shortcut handler
+  browser.commands.onCommand.addListener(handleCommand);
+
   // Handle messages from native messaging host (Phase 2: Data Export Pipeline)
   // The CLI triggers export by launching the native host, which sends a message to the extension.
   // Extension responds with current captures from chrome.storage.
-  browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.action === 'getCaptures') {
-      handleGetCaptures().then(sendResponse).catch(err => {
+  browser.runtime.onMessage.addListener(async (message: unknown) => {
+    if ((message as { action?: string }).action === 'getCaptures') {
+      try {
+        return await handleGetCaptures();
+      } catch (err) {
         console.error('Error handling getCaptures:', err);
-        sendResponse({ error: String(err) });
-      });
-      return true; // Indicates async response
+        return { error: String(err) };
+      }
     }
   });
 

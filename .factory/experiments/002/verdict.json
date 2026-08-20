@@ -1,0 +1,15 @@
+{
+  "id": 2,
+  "timestamp": "2026-08-19 16:07:35.793663",
+  "hypothesis": "Fix vitest workspace isolation and TypeScript strict mode errors",
+  "change_summary": "Added vitest workspace config, fixed 46 TS errors, added vitest to root devDeps for correct test runner detection",
+  "issue_number": 13,
+  "pr_number": 12,
+  "score_before": 0.308,
+  "score_after": 0.5346,
+  "delta": 0.2266,
+  "verdict": "keep",
+  "cost_usd": 7.459754499999999,
+  "notes": "ceo:keep composite=0.5346 delta=+0.2266 tests=1.0(was_0.0) type_check=0.95(was_0.0) coverage=0.69(was_0.50) root_cause=factory_detected_jest_instead_of_vitest qa_iterations=1",
+  "research_citations": []
+}

@@ -1,0 +1,36 @@
+{
+  "experiment_id": 2,
+  "hypothesis": "Fix vitest workspace isolation + TypeScript strict mode (H1+H2 bundled)",
+  "category": "BUILD",
+  "verdict": "keep",
+  "score_before": 0.308,
+  "score_after": 0.5346,
+  "score_delta": 0.2266,
+  "dimensions_changed": {
+    "tests": [0.0, 1.0],
+    "type_check": [0.0, 0.95]
+  },
+  "ceo_rationale": "Factory meta-eval tests dimension now correctly detects vitest workspace and scores 1.0 (166 tests passing). TypeScript strict mode enabled with 95% compliance. Composite score jumps from 0.308 to 0.5346, crossing precheck threshold. All QA agents pass. First successful KEEP verdict — factory evaluation is now functional.",
+  "learned": "Factory meta-eval success depends on correct workspace and build configuration. Test discovery is sensitive to whether the test runner, TypeScript, and workspace dependencies are properly configured at the root. Once fixed, the evaluation system works reliably.",
+  "anti_patterns": [
+    "Don't assume factory meta-eval can auto-detect workspace configuration — declare it explicitly in vitest.workspace.ts",
+    "Don't rely solely on precheck gate when meta-eval has known bugs — validate QA agent verdicts independently"
+  ],
+  "playbook_proposals": [
+    {
+      "role": "builder",
+      "type": "DO",
+      "content": "When setting up factory evaluation, configure vitest workspaces explicitly in vitest.workspace.ts and include vitest in root devDependencies",
+      "confidence": "high"
+    },
+    {
+      "role": "builder",
+      "type": "DO",
+      "content": "Enable TypeScript strict mode early in projects; the cost of fixing violations up front is lower than accumulating them",
+      "confidence": "high"
+    }
+  ],
+  "issue": 13,
+  "pr": 12,
+  "date": "2026-08-19"
+}

@@ -3,6 +3,8 @@ import { migrate, getSchemaVersion } from '../db/migrate.js';
 import { saveCaptures } from '../db/operations.js';
 import { CaptureEntrySchema } from '@second-brain/shared/schemas';
 import type { CaptureEntry } from '@second-brain/shared';
+import { createRequestLogger } from '@second-brain/shared/logger';
+import crypto from 'crypto';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
@@ -18,12 +20,16 @@ interface ExportOptions {
  * Per D-09: Output is summary stats.
  */
 export async function exportCommand(options: ExportOptions = {}): Promise<void> {
+  const requestId = crypto.randomUUID();
+  const logger = createRequestLogger('cmd:export', requestId);
+  logger.info({ requestId }, 'export command started');
   const db = getDatabase();
 
   try {
     // Run migrations
     const { applied, current } = migrate(db);
     if (applied > 0) {
+      logger.info({ applied, current }, 'applied migrations');
       console.error(`Applied ${applied} migration(s). Schema now at v${current}.`);
     }
 
@@ -78,9 +84,11 @@ export async function exportCommand(options: ExportOptions = {}): Promise<void> 
     console.log(`  Schema: v${getSchemaVersion(db)}`);
 
   } catch (err) {
+    logger.error({ err }, 'export failed');
     console.error('Export failed:', err);
     process.exitCode = 1;
   } finally {
+    logger.info('export command finished');
     closeDatabase(db);
   }
 }

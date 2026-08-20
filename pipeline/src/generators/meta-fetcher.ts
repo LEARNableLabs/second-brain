@@ -1,4 +1,7 @@
 import * as cheerio from 'cheerio';
+import { createModuleLogger } from '@second-brain/shared/logger';
+
+const logger = createModuleLogger('generators:meta-fetcher');
 
 export interface MetaResult {
   description?: string;
@@ -6,6 +9,7 @@ export interface MetaResult {
 }
 
 export async function fetchMetaDescription(url: string): Promise<MetaResult> {
+  logger.debug({ url }, 'fetching meta description');
   try {
     const response = await fetch(url, {
       signal: AbortSignal.timeout(5000),
@@ -13,6 +17,7 @@ export async function fetchMetaDescription(url: string): Promise<MetaResult> {
     });
 
     if (!response.ok) {
+      logger.warn({ url, status: response.status }, 'fetch returned non-OK status');
       return { error: `HTTP ${response.status}` };
     }
 
@@ -32,13 +37,16 @@ export async function fetchMetaDescription(url: string): Promise<MetaResult> {
     return { error: 'No description found' };
   } catch (err: any) {
     if (err.name === 'TimeoutError') {
+      logger.warn({ url }, 'meta fetch timed out');
       return { error: 'Timeout after 5s' };
     }
+    logger.error({ url, err }, 'meta fetch failed');
     return { error: err.message };
   }
 }
 
 export async function fetchAllDescriptions(urls: string[]): Promise<Map<string, string>> {
+  logger.info({ urlCount: urls.length }, 'fetching all meta descriptions');
   const results = await Promise.allSettled(
     urls.map(async (url) => {
       const result = await fetchMetaDescription(url);

@@ -9,6 +9,9 @@
  */
 
 import { readMessage, writeMessage } from './protocol.js';
+import { createModuleLogger } from '@second-brain/shared/logger';
+
+const logger = createModuleLogger('messaging:host');
 
 export interface GetCapturesMessage {
   action: 'getCaptures';
@@ -22,6 +25,7 @@ export interface PingMessage {
 export type NativeMessage = GetCapturesMessage | PingMessage;
 
 export function handleMessage(msg: NativeMessage): any {
+  logger.info({ action: msg.action }, 'handling message');
   switch (msg.action) {
     case 'getCaptures': {
       const capturesByDate = msg.captures || {};
@@ -29,25 +33,28 @@ export function handleMessage(msg: NativeMessage): any {
       for (const dateKey of Object.keys(capturesByDate)) {
         totalCount += capturesByDate[dateKey].length;
       }
-      console.error(`[native-host] Received ${totalCount} captures across ${Object.keys(capturesByDate).length} days`);
+      logger.info({ totalCount, days: Object.keys(capturesByDate).length }, 'received captures');
       return { success: true, received: totalCount, captures: capturesByDate };
     }
     case 'ping':
+      logger.debug('ping received');
       return { pong: true };
     default:
-      console.error(`[native-host] Unknown action: ${(msg as any).action}`);
+      logger.warn({ action: (msg as any).action }, 'unknown action');
       return { error: `Unknown action: ${(msg as any).action}` };
   }
 }
 
 export async function runHost(): Promise<void> {
+  logger.info('native messaging host starting');
   try {
     const msg = await readMessage();
-    console.error(`[native-host] Received message: action=${msg.action}`);
+    logger.info({ action: msg.action }, 'received message');
     const response = handleMessage(msg);
     writeMessage(response);
+    logger.info('response sent');
   } catch (err) {
-    console.error(`[native-host] Error:`, err);
+    logger.error({ err }, 'native host error');
     writeMessage({ error: String(err) });
   }
 }

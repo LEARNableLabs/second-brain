@@ -1,0 +1,91 @@
+{
+  "total": 0.6049025,
+  "results": [
+    {
+      "name": "tests",
+      "score": 1.0,
+      "weight": 0.155,
+      "passed": true,
+      "details": "run-e5719851(js): 19 passed, 0 failed; extension(js): 7 passed, 0 failed; pipeline(js): 10 passed, 0 failed; shared(js): 2 passed, 0 failed"
+    },
+    {
+      "name": "lint",
+      "score": 0.6,
+      "weight": 0.075,
+      "passed": false,
+      "details": "run-e5719851(js): 1 errors; extension(js): 1 errors; pipeline(js): 1 errors; shared(js): 1 errors"
+    },
+    {
+      "name": "type_check",
+      "score": 0.95,
+      "weight": 0.05,
+      "passed": false,
+      "details": "run-e5719851(ts): 1 errors; extension(ts): clean; pipeline(ts): clean; shared(ts): clean"
+    },
+    {
+      "name": "coverage",
+      "score": 0.7043,
+      "weight": 0.125,
+      "passed": false,
+      "details": "Coverage: run-e5719851(js): 59%, extension(js): 38%, pipeline(js): 85%, shared(js): 100% (threshold: 80%)"
+    },
+    {
+      "name": "config_parser",
+      "score": 1.0,
+      "weight": 0.05,
+      "passed": true,
+      "details": "OK: goal is non-empty; OK: scope has entries; OK: eval_command is non-empty; OK: eval_threshold is positive"
+    },
+    {
+      "name": "architecture",
+      "score": 0.5,
+      "weight": 0.045,
+      "passed": true,
+      "details": "Not detected: no .sentrux/rules.toml found"
+    },
+    {
+      "name": "capability_surface",
+      "score": 0.04,
+      "weight": 0.125,
+      "passed": false,
+      "details": "surface=4 (modules=1, public_fns=3, entry_points=0), target=100"
+    },
+    {
+      "name": "experiment_diversity",
+      "score": 0.6857,
+      "weight": 0.1,
+      "passed": true,
+      "details": "3 distinct categories in last 4 experiments; dominant=feature (50%); last 3: ['feature', 'bugfix', 'observability']"
+    },
+    {
+      "name": "observability",
+      "score": 0.713,
+      "weight": 0.09,
+      "passed": true,
+      "details": "observability_score=0.71, function_coverage=0.30, structured_logging=False"
+    },
+    {
+      "name": "research_grounding",
+      "score": 0.0,
+      "weight": 0.07,
+      "passed": false,
+      "details": "sources=0 (archive), utilization=0.00, research_report=no, doc_ratio=0.00 (0/4), citation_ratio=0.00"
+    },
+    {
+      "name": "factory_effectiveness",
+      "score": 0.525,
+      "weight": 0.065,
+      "passed": true,
+      "details": "keep_rate=0.50 (2/4), delta_score=1.00, managed_projects=0"
+    },
+    {
+      "name": "spec_compliance",
+      "score": 0.5,
+      "weight": 0.05,
+      "passed": true,
+      "details": "spec_results.json not found \u2014 neutral score"
+    }
+  ],
+  "guard_violations": [],
+  "passed": true
+}

@@ -1,5 +1,8 @@
 import browser from 'webextension-polyfill';
 import { CaptureEntry, CaptureEntrySchema, StorageState, StorageStateSchema } from './types';
+import { createModuleLogger } from './logger';
+
+const logger = createModuleLogger('storage');
 
 /**
  * Load storage state with Zod validation
@@ -7,6 +10,7 @@ import { CaptureEntry, CaptureEntrySchema, StorageState, StorageStateSchema } fr
  * Mitigates T-01-02: Tampering via corrupted storage data
  */
 export async function loadStorage(): Promise<StorageState> {
+  logger.debug('loading storage state');
   const raw = await browser.storage.local.get();
 
   // Validate and provide defaults via Zod schema
@@ -19,6 +23,7 @@ export async function loadStorage(): Promise<StorageState> {
  * Updates only the specified fields in chrome.storage.local
  */
 export async function saveStorage(data: Partial<StorageState>): Promise<void> {
+  logger.debug('saving storage state');
   await browser.storage.local.set(data);
 }
 
@@ -39,6 +44,7 @@ export function getToday(): string {
  * @returns true if saved, false if already exists (duplicate)
  */
 export async function saveCapture(entry: CaptureEntry): Promise<boolean> {
+  logger.info({ url: entry.url }, 'saving capture');
   const today = getToday();
   const result = await browser.storage.local.get('captures');
   const captures: Record<string, CaptureEntry[]> = (result.captures as Record<string, CaptureEntry[]>) || {};
@@ -71,6 +77,7 @@ export async function saveCapture(entry: CaptureEntry): Promise<boolean> {
  * @returns true if saved or upgraded, false on error
  */
 export async function saveManualCapture(url: string, title: string, domain: string): Promise<boolean> {
+  logger.info({ url }, 'saving manual capture');
   const today = getToday();
   const result = await browser.storage.local.get('captures');
   const captures: Record<string, CaptureEntry[]> = (result.captures as Record<string, CaptureEntry[]>) || {};
@@ -114,6 +121,7 @@ export async function saveManualCapture(url: string, title: string, domain: stri
  * Get count of captures for today
  */
 export async function getTodayCount(): Promise<number> {
+  logger.debug('getting today count');
   const today = getToday();
   const result = await browser.storage.local.get('captures');
   const captures: Record<string, CaptureEntry[]> = (result.captures as Record<string, CaptureEntry[]>) || {};
@@ -124,6 +132,7 @@ export async function getTodayCount(): Promise<number> {
  * Get the most recent capture entry
  */
 export async function getLastCapture(): Promise<CaptureEntry | null> {
+  logger.debug('getting last capture');
   const today = getToday();
   const result = await browser.storage.local.get('captures');
   const captures: Record<string, CaptureEntry[]> = (result.captures as Record<string, CaptureEntry[]>) || {};

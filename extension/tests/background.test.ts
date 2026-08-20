@@ -15,8 +15,8 @@ const mockBlocklist = {
 };
 
 const mockHistoryBackfill = {
-  detectGap: vi.fn(async () => null),
-  backfillHistory: vi.fn(async () => 0),
+  detectGap: vi.fn(async () => null as number | null),
+  backfillHistory: vi.fn(async (_start?: number) => 0),
 };
 
 const mockStorage: Record<string, any> = {};
@@ -109,7 +109,7 @@ describe('background service worker', () => {
         tabId: 123,
         url: 'https://example.com/page',
         frameId: 0,
-        processId: 0,
+
         timeStamp: Date.now(),
       };
 
@@ -140,7 +140,7 @@ describe('background service worker', () => {
         tabId: 123,
         url: 'https://example.com/page',
         frameId: 0,
-        processId: 0,
+
         timeStamp: Date.now(),
       };
 
@@ -160,7 +160,7 @@ describe('background service worker', () => {
         tabId: 123,
         url: 'https://blocked.com/page',
         frameId: 0,
-        processId: 0,
+
         timeStamp: Date.now(),
       };
 
@@ -182,7 +182,7 @@ describe('background service worker', () => {
         tabId: 123,
         url: 'chrome://extensions/',
         frameId: 0,
-        processId: 0,
+
         timeStamp: Date.now(),
       };
 
@@ -190,7 +190,7 @@ describe('background service worker', () => {
         tabId: 124,
         url: 'about:blank',
         frameId: 0,
-        processId: 0,
+
         timeStamp: Date.now(),
       };
 
@@ -198,7 +198,7 @@ describe('background service worker', () => {
         tabId: 125,
         url: 'chrome-extension://abcdef/popup.html',
         frameId: 0,
-        processId: 0,
+
         timeStamp: Date.now(),
       };
 
@@ -274,9 +274,10 @@ describe('background service worker', () => {
 
   describe('handleInstall', () => {
     it('initializes default blocklist in storage on install', async () => {
-      const details: Runtime.OnInstalledDetailsType = {
-        reason: 'install' as chrome.runtime.OnInstalledReason,
-      };
+      const details = {
+        reason: 'install',
+        temporary: false,
+      } as Runtime.OnInstalledDetailsType;
 
       // Mock fetch for blocklist.json
       global.fetch = vi.fn(async () => ({
@@ -364,9 +365,10 @@ describe('background service worker', () => {
 
   describe('handleInstall on update', () => {
     it('calls detectGap when extension is updated', async () => {
-      const details: Runtime.OnInstalledDetailsType = {
-        reason: 'update' as chrome.runtime.OnInstalledReason,
-      };
+      const details = {
+        reason: 'update',
+        temporary: false,
+      } as Runtime.OnInstalledDetailsType;
 
       mockHistoryBackfill.detectGap.mockResolvedValue(null);
 
@@ -379,9 +381,10 @@ describe('background service worker', () => {
     });
 
     it('calls backfillHistory when gap is detected on update', async () => {
-      const details: Runtime.OnInstalledDetailsType = {
-        reason: 'update' as chrome.runtime.OnInstalledReason,
-      };
+      const details = {
+        reason: 'update',
+        temporary: false,
+      } as Runtime.OnInstalledDetailsType;
 
       const gapTimestamp = Date.now() - (30 * 60 * 1000); // 30 minutes ago
       mockHistoryBackfill.detectGap.mockResolvedValue(gapTimestamp);

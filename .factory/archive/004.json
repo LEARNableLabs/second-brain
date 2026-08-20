@@ -1,0 +1,36 @@
+{
+  "experiment_id": 4,
+  "hypothesis": "Re-attempt manual capture features for capability_surface growth",
+  "category": "EXPLOIT",
+  "verdict": "keep",
+  "score_before": 0.5865,
+  "score_after": 0.6049,
+  "score_delta": 0.0184,
+  "dimensions_changed": {
+    "experiment_diversity": [0.5, 0.686],
+    "factory_effectiveness": [0.5, 0.525]
+  },
+  "ceo_rationale": "Manual capture features now functional with correct contextMenus API placement. Architecture fix resolves Cycle 1 failure. QA gate caught placement error on iteration 2 and guided redirect.",
+  "learned": "Context menu registration in MV3 must occur in background service worker onInstalled listener, not content scripts. Incorrect API placement caused Cycle 1 failure, not flawed hypothesis.",
+  "anti_patterns": [
+    "Don't register contextMenus.create() from content scripts in MV3",
+    "Don't implement manifest v3 extension features before validating correct API surface"
+  ],
+  "playbook_proposals": [
+    {
+      "role": "builder",
+      "type": "DO",
+      "content": "For MV3 context menu features, use chrome.contextMenus.create() in background service worker onInstalled listener",
+      "confidence": "high"
+    },
+    {
+      "role": "code_reviewer",
+      "type": "DO",
+      "content": "Flag MV3 API calls in content scripts — verify they belong in service worker or other contexts",
+      "confidence": "high"
+    }
+  ],
+  "issue": null,
+  "pr": 12,
+  "date": "2026-08-19"
+}

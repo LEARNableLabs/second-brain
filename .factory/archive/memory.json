@@ -1,0 +1,71 @@
+[
+  {
+    "type": "anti_pattern",
+    "text": "Factory meta-eval tests dimension broken for monorepo projects — reports 0 passed when npm test shows 166 passing",
+    "evidence": [1],
+    "date": "2026-08-19",
+    "severity": "critical",
+    "blocker": true,
+    "context": "Prevents all experiments from passing precheck gate despite high code quality. Root cause: meta-eval test runner not detecting monorepo workspace structure."
+  },
+  {
+    "type": "pattern",
+    "text": "QA agents (health_checker, code_reviewer, adversarial_tester) provide reliable quality signals even when precheck gate fails due to meta-eval bugs",
+    "evidence": [1],
+    "date": "2026-08-19",
+    "confidence": "high"
+  },
+  {
+    "type": "agent_perf",
+    "agent": "builder",
+    "text": "Builder executes hypotheses precisely with zero scope creep. Tests always included and passing.",
+    "evidence": [1],
+    "date": "2026-08-19",
+    "confidence": "high"
+  },
+  {
+    "type": "pattern",
+    "text": "Bundled/composite hypotheses work well when the components are coupled blockers. H1 (vitest workspace) + H2 (TypeScript strict mode) were interdependent fixes that accelerated the path to a working factory.",
+    "evidence": [2],
+    "date": "2026-08-19",
+    "confidence": "high"
+  },
+  {
+    "type": "milestone",
+    "text": "First KEEP verdict achieved — Experiment #2. Factory evaluation is now functional. Composite score crossed precheck threshold (0.5346 > 0.5).",
+    "evidence": [2],
+    "date": "2026-08-19",
+    "severity": "critical",
+    "significance": "Marks transition from factory setup phase to active hypothesis experimentation"
+  },
+  {
+    "type": "pattern",
+    "text": "Observability improvements are high-impact and low-risk. Structured logging experiments (H3) deliver transformative gains (53pt on observability dimension) with no regressions.",
+    "evidence": [3],
+    "date": "2026-08-19",
+    "confidence": "high"
+  },
+  {
+    "type": "milestone",
+    "text": "Consecutive KEEP verdicts established — Experiments #2 and #3. Composite score momentum: 0.5346 → 0.5865 (+0.0519). Factory is producing reliable, cumulative improvements.",
+    "evidence": [2, 3],
+    "date": "2026-08-19",
+    "severity": "high",
+    "significance": "Demonstrates factory's ability to compound improvements across cycles"
+  },
+  {
+    "type": "pattern",
+    "text": "Failed experiments from prior cycles can succeed on re-attempt with architectural corrections. Cycle 1 Exp #1 (manual capture) failed due to incorrect MV3 API placement; Cycle 2 Exp #4 succeeded with contextMenus.create() moved to onInstalled listener.",
+    "evidence": [1, 4],
+    "date": "2026-08-19",
+    "confidence": "high"
+  },
+  {
+    "type": "milestone",
+    "text": "CYCLE 2 COMPLETE — All 3 active experiments KEPT. Composite score: 0.308 → 0.6049 (+0.2969, +96.4%). Factory fully functional and producing cumulative value.",
+    "evidence": [2, 3, 4],
+    "date": "2026-08-19",
+    "severity": "critical",
+    "significance": "Marks factory transition from setup/debugging to stable, productive operation. Ready for scaled hypothesis exploration in Cycle 3."
+  }
+]

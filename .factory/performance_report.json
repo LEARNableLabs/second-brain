@@ -1,0 +1,399 @@
+{
+  "project_name": "run-e5719851",
+  "generated_at": "2026-08-19 16:31:21.400843",
+  "total_experiments": 5,
+  "keep_count": 3,
+  "revert_count": 2,
+  "error_count": 0,
+  "keep_rate": 0.6,
+  "latest_score": 0.6049,
+  "agent_verdicts": [
+    {
+      "role": "build-h3",
+      "verdict": "PROCEED",
+      "rationale": "Builder implemented all requested changes on-scope. New files: shared/src/logger.ts, extension/components/logger.ts. Instrumented 8 source files (operations.ts, connection.ts, reader.ts, markdown.ts, meta-fetcher.ts, export.ts, generate.ts, host.ts, storage.ts, history-backfill.ts). RequestId tracing added to CLI commands. All 166 tests pass, tsc clean.",
+      "issues": [
+        "None \u2014 changes match hypothesis, no scope creep.",
+        "**Instructions for next step:** Proceed to deep-QA pipeline (health checker + code reviewer + adversarial tester)."
+      ],
+      "experiment_id": null
+    },
+    {
+      "role": "build-h4",
+      "verdict": "PROCEED",
+      "rationale": "Manual capture code was already present on branch from cycle 1 (commit 0b0d01b). Builder correctly identified this and only added structured logging to the existing handlers rather than reimplementing. All 166 tests pass, tsc clean.",
+      "issues": [
+        "None \u2014 minimal, targeted change.",
+        "**Instructions for next step:** Proceed to deep-QA pipeline."
+      ],
+      "experiment_id": null
+    },
+    {
+      "role": "build",
+      "verdict": "PROCEED",
+      "rationale": "Both parts implemented correctly, verified.",
+      "issues": [
+        "None \u2014 changes match hypothesis, no scope creep.",
+        "**Instructions for next step:** Proceed to deep-QA pipeline."
+      ],
+      "experiment_id": null
+    },
+    {
+      "role": "discover",
+      "verdict": "PROCEED",
+      "rationale": "Discovery produced a valid eval_profile.json and eval/score.py with 2 dimensions (tests at 0.83 weight, observability at 0.17 weight). The `tests` dimension correctly uses `npm test` which aligns with the project's vitest setup. The auto-discovery is acceptable as a starting point \u2014 the Review step will test the harness and fix broken dimensions.",
+      "issues": [
+        "1. **Critical: observability eval scans only .py files** \u2014 uses Python's `ast.parse` and globs `*.py`, but this is a TypeScript project. Will always report \"No functions found\" with score 0.0. Must be fixed in Review step.",
+        "2. **Missing dimensions:** No type_check (project has tsconfig.json), no lint, no coverage \u2014 all relevant for a TypeScript monorepo.",
+        "3. **Project type misidentified** as `cli_tool` \u2014 it's a multi-component system (pipeline + browser extension + shared lib).",
+        "4. **Weights are lopsided** \u2014 tests at 83% is too dominant for a 2-dimension profile.",
+        "**Instructions for next step:** Re-detect project state to transition to evals_pending_review. During Review, the Builder must fix the observability eval to scan .ts/.tsx files and consider adding type_check and lint dimensions."
+      ],
+      "experiment_id": null
+    },
+    {
+      "role": "doc-freshness",
+      "verdict": "PROCEED",
+      "rationale": "The changes add new browser extension features (context menu, keyboard shortcut) but do not change any public API, CLI commands, or configuration options that would require doc updates. The manifest changes (new permission, new command) are self-documented in the manifest itself. No README/CLAUDE.md/doc changes needed.",
+      "issues": [],
+      "experiment_id": null
+    },
+    {
+      "role": "e2e",
+      "verdict": "PROCEED",
+      "rationale": "The project runs end-to-end successfully.",
+      "issues": [
+        "None \u2014 project is ready to transition to Improve mode",
+        "**Instructions for next step:** Proceed to Improve mode. Priority targets: fix factory eval test dimension (it reports 0 despite npm test passing), improve type_check, and add real capabilities (growth dimensions)."
+      ],
+      "experiment_id": null
+    },
+    {
+      "role": "eval",
+      "verdict": "PROCEED",
+      "rationale": "Both eval dimensions now produce valid scores after Builder fixes.",
+      "issues": [
+        "None \u2014 Builder correctly installed webextension-polyfill and rewrote observability eval for TypeScript scanning.",
+        "**Instructions for next step:** Mark eval profile as reviewed, then proceed to create factory.md and initialize the factory."
+      ],
+      "experiment_id": null
+    },
+    {
+      "role": "qa",
+      "verdict": "PROCEED",
+      "rationale": "All 3 QA agents passed clean.",
+      "issues": [
+        "capability_surface didn't improve in factory meta-eval (still 0.04) \u2014 the meta-eval likely doesn't detect Chrome extension APIs as surface area. The actual features (context menu, keyboard shortcut) are correctly implemented.",
+        "**Instructions for next step:** Run precheck gate, then finalize with keep verdict."
+      ],
+      "experiment_id": null
+    },
+    {
+      "role": "research",
+      "verdict": "PROCEED",
+      "rationale": "The blocker is fully understood from CEO investigation. The factory meta-eval runs `npx vitest run` from project root, which finds 19 test files across all 3 workspaces but runs them in a single context. 9 files fail because extension tests require workspace-specific setup (chrome API mocks). Fix: create `vitest.workspace.ts` at project root referencing each workspace's vitest config.",
+      "issues": [],
+      "experiment_id": null
+    },
+    {
+      "role": "strategy",
+      "verdict": "PROCEED",
+      "rationale": "Strategy meets all hard gate requirements:",
+      "issues": [],
+      "experiment_id": null
+    }
+  ],
+  "observations": [
+    {
+      "source": "observations.md",
+      "content": "# Interaction Study \u2014: Analyzed 10 conversation log(s), 34 relevant messages.",
+      "timestamp": "2026-08-19 16:31:21.399813",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "User Messages (11): - Archive experiment results and learnings from the first improve cycle.\n\nKEY FACTS TO ARCHIVE:\n- Experiment #1: H1 \u2014 Manual capture features (context menu, keyboard shortcut, popup button)\n- Verdict: R\n- Deep research for the project. Read observations at .factory/strategy/observations.md. Analyze codebase structure, eval scores, and experiment history. Search the web for best practices relevant to we\n- Fix two issues to make the eval harness work:\n\n1. INSTALL MISSING DEPENDENCY: The extension ",
+      "timestamp": "2026-08-19 16:31:21.399824",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Branch Override: Target branch for all PRs and merges: `main`\nThe Builder should create experimen\n- go for it",
+      "timestamp": "2026-08-19 16:31:21.399827",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Errors and Issues (23): - The **#1 priority for Cycle 002 is fixing the factory's test runner**. Here's why:\n- **Root cause:** The factory's `tests` dimension doesn't detect this monorepo's test structure. Until fixed, **no experiment can pass precheck**, making the factory non-functional. The code itself is h\n- **What's blocked:** H2 (Pino structured logging), type error fixes, and all future experiments.\n- **2. TypeScript Errors:** 24 errors in extension, dominated by TS2503 \"Cannot find namespace 'chrome'\" (29%). Fi",
+      "timestamp": "2026-08-19 16:31:21.399834",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Similar Projects: - [PREMPATIL19/velvet](https://github.com/PREMPATIL19/velvet) (0 stars) \u2014 <div align=\"center\">  <img src=\"/assets/logo.png\" width=\"150\" height=\"150\" />  # Velvet  Velvet is a lightweight tool designed for seamless project management and collaboration. \ud83c\udf1f Join us in building \n- [Dzodah8772/ArchFlux](https://github.com/Dzodah8772/ArchFlux) (0 stars) \u2014 <p align=\"center\">   <img src=\"assets/logo.png\" width=\"180\" alt=\"ArchFlux Logo\"> </p>  <h1 align=\"center\">ArchFlux BSPWM + i3 Live ISO</h1>  <p align",
+      "timestamp": "2026-08-19 16:31:21.399838",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "SPEC: No SPEC.md found. Run 'factory spec generate <path>' to generate one.",
+      "timestamp": "2026-08-19 16:31:21.399839",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Open GitHub Issues: ### Your Issues (6) \u2014 actionable, may generate fix hypotheses\n\n- **#11** Fix eval harness: install missing dependency and rewrite observability eval for TypeScript (by @georgosgeorgos)\n  > ## Problem  The eval harness has two issues preventing meaningful scoring:  1. **Tests fail**: `npm test` exits 1 because `webextension-polyfill` is not installed in the extension workspace 2. **Observability scores 0**: `eval_observability()` scans only `*.py` files using Python's `ast` module, but\n- **#10** ",
+      "timestamp": "2026-08-19 16:31:21.399846",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Backlog: **8 items** in the backlog. Clear as many as possible this cycle.\n\n- **Fix factory meta-eval tests dimension:** The factory meta-eval reports \"0 passed, 18 failed\" while `npm test` passes 166 tests. This is a monorepo workspace detection issue. No experiment can pass the precheck gate until this is fixed. Investigate how `factory eval` runs tests vs how `eval/score.py` runs them \u2014 the project eval/score.py correctly scores 1.0, but `factory eval` scores 0.0 for the tests dimension. **Growth dime",
+      "timestamp": "2026-08-19 16:31:21.399851",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Observability Coverage: - **Score:** 17.7%\n- **Function coverage:** 27/139 functions have logging (19%)\n- **Total log statements:** 92\n- **Structured logging:** No\n- **Request tracing:** No\n\n### Uninstrumented Files\n- extension/components/history-backfill.ts (4 functions, 0 log statements)\n- extension/components/storage.ts (13 functions, 0 log statements)\n- pipeline/src/ai/vault-scanner.ts (4 functions, 0 log statements)\n- pipeline/src/ai/provider.ts (4 functions, 0 log statements)\n- pipeline/src/ai/curate.ts (3 functi",
+      "timestamp": "2026-08-19 16:31:21.399855",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Prior Knowledge (Obsidian): No prior notes found.",
+      "timestamp": "2026-08-19 16:31:21.399856",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Hypothesis Budget: **Backlog items: 8** (clear as many as possible this cycle)\n**New items: at most 2** (researcher/strategist may add new ideas)\n**Growth minimum: 2** (at least 2 hypotheses must target growth dimensions)\n\n### Rules\n\n- Read the backlog first. Pick items to implement this cycle \u2014 no cap on clearing.\n- You may add at most 2 NEW items that aren't already in the backlog.\n- At least 2 hypotheses must target growth dimensions (capability_surface, factory_effectiveness, research_grounding, experiment_div",
+      "timestamp": "2026-08-19 16:31:21.399861",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Episodic Memory (Task-Relevant): ============================================================\n  Results for: \"# Interaction Study \u2014   Analyzed 3 conversation log(s), 9 relevant messages.  ## User Messages (3)\"\n  Wing: project:/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851\n============================================================\n\n  [1] project:/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851 / experiments\n      Source: current.md\n      Match:  cosine_sim=0.218  bm25=3.927",
+      "timestamp": "2026-08-19 16:31:21.399905",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Past QA Findings: ============================================================\n  Results for: \"code review issues findings\"\n  Wing: project:/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851\n  Room: reviews\n============================================================\n\n  [1] project:/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851 / reviews\n      Source: code-review.md\n      Match:  cosine_sim=0.143  bm25=2.923\n\n      # Code Review \u2014 Manual Capture Features\n      \n",
+      "timestamp": "2026-08-19 16:31:21.399944",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Design Rationale: ============================================================\n  Results for: \"decision rationale tradeoff\"\n  Wing: project:/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851\n  Room: decisions\n============================================================\n\n  [1] project:/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851 / decisions\n      Source: verdict.json\n      Match:  cosine_sim=0.049  bm25=0.0\n\n      {\n        \"id\": 1,\n        \"timestamp\": \"2026-0",
+      "timestamp": "2026-08-19 16:31:21.399951",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Anti-Patterns & Past Failures: No results found for: \"failed reverted broken\"",
+      "timestamp": "2026-08-19 16:31:21.399953",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Knowledge Graph Facts: /Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851 has_hypothesis H1: Add manual capture features \u2014 popup button, context menu, keyboard shortcut\n/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851 has_hypothesis H2: Add Pino structured logging to pipeline and shared modules\n/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851 rejected_approach **Don't fix the factory meta-eval tests discrepancy in these hypotheses:** The tests",
+      "timestamp": "2026-08-19 16:31:21.399957",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Timeline: 2026-08-19: /Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851 has_hypothesis H1: Add manual capture features \u2014 popup button, context menu, keyboard shortcut\n2026-08-19: /Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851 has_hypothesis H2: Add Pino structured logging to pipeline and shared modules\n2026-08-19: /Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851 rejected_approach **Don't fix the factory meta-eval tests discrepa",
+      "timestamp": "2026-08-19 16:31:21.399961",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": "observations.md",
+      "content": "Experiment Outcomes: ============================================================\n  Results for: \"experiment verdict keep revert\"\n  Wing: project:/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851\n  Room: experiments\n============================================================\n\n  [1] project:/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851 / experiments\n      Source: current.md\n      Match:  cosine_sim=0.2  bm25=0.575\n\n      ## Strategy \u2014 2026-08-19\n      \n      ### ",
+      "timestamp": "2026-08-19 16:31:21.399974",
+      "project": "run-e5719851",
+      "tags": [
+        "observation"
+      ]
+    },
+    {
+      "source": ".factory/archive/CYCLE_001_SUMMARY.md",
+      "content": "# Factory Cycle 001 Summary \u2014 Second Brain Project\n\n**Date:** 2026-08-19  \n**Project:** second-brain  \n**Cycle Result:** 1 experiment executed, 1 reverted (due to meta-eval blocker)\n\n---\n\n## Execution Summary\n\n### Baseline\n- **Initial composite score:** 0.306 (below 0.5 threshold)\n- **Key weaknesses:** tests=0.0, type_check=0.0, capability_surface=0.04, observability=0.181\n- **Code quality:** All 166 tests passing, 0 guard violations\n\n### Experiment #1: Manual Capture Features\n**Hypothesis:** Ad",
+      "timestamp": "2026-08-19 16:31:21.400207",
+      "project": "run-e5719851",
+      "tags": [
+        "archive"
+      ]
+    },
+    {
+      "source": ".factory/archive/CYCLE_002_SUMMARY.md",
+      "content": "---\ntags: [factory, cycle, second-brain]\nproject: second-brain\ncycle: 2\ndate: 2026-08-19\nsource: factory-archivist\n---\n\n# Cycle 2 Final Summary: Factory Fully Operational\n\n## Overall Performance\n\n| Metric | Value |\n|--------|-------|\n| **Experiments Started** | 4 |\n| **Experiments Kept** | 3 |\n| **Keep Rate** | 75% |\n| **Starting Composite Score** | 0.308 |\n| **Ending Composite Score** | 0.6049 |\n| **Total Score Delta** | +0.2969 |\n| **Improvement Rate** | **+96.4%** |\n| **PR** | #12 (factory/ru",
+      "timestamp": "2026-08-19 16:31:21.400252",
+      "project": "run-e5719851",
+      "tags": [
+        "archive"
+      ]
+    },
+    {
+      "source": ".factory/archive/experiment-001.md",
+      "content": "---\ntags: [factory, experiment, second-brain]\nproject: second-brain\nexperiment_id: 001\nverdict: revert\nscore_delta: +0.002\ndate: 2026-08-19\nsource: factory-archivist\n---\n\n# Experiment #001: Add manual capture features\n\n## Result\n**REVERT** \u2014 Score improved from 0.306 to 0.308 (+0.002), all tests pass (166/166), zero QA violations. Force-reverted by precheck gate because composite score 0.308 < threshold 0.5. This is a pre-existing condition, not a regression.\n\n## What Changed\nImplemented three m",
+      "timestamp": "2026-08-19 16:31:21.400408",
+      "project": "run-e5719851",
+      "tags": [
+        "archive"
+      ]
+    },
+    {
+      "source": ".factory/archive/experiment-002.md",
+      "content": "---\ntags: [factory, experiment, second-brain]\nproject: second-brain\nexperiment_id: 002\nverdict: keep\nscore_delta: +0.2266\ndate: 2026-08-19\nsource: factory-archivist\n---\n\n# Experiment #002: Fix vitest workspace isolation + TypeScript strict mode\n\n## Result\n**KEEP** \u2014 Score improved from 0.308 to 0.5346 (+0.2266). **First successful KEEP verdict.** The factory evaluation is now functional.\n\nKey dimension wins:\n- `tests`: 0.0 \u2192 1.0 (meta-eval now correctly detects vitest workspace)\n- `type_check`: ",
+      "timestamp": "2026-08-19 16:31:21.400450",
+      "project": "run-e5719851",
+      "tags": [
+        "archive"
+      ]
+    },
+    {
+      "source": ".factory/archive/experiment-003.md",
+      "content": "---\ntags: [factory, experiment, second-brain]\nproject: second-brain\nexperiment_id: 3\nhypothesis: H3 Pino structured logging\nverdict: keep\nscore_before: 0.5346\nscore_after: 0.5865\nscore_delta: 0.0519\ndate: 2026-08-19\nsource: factory-archivist\n---\n\n# Experiment #3: H3 Pino structured logging\n\n## Result\n**KEEP** \u2014 composite score improved from 0.5346 to 0.5865 (+0.0519)\n\n## What Changed\n- Created shared logger module at `shared/src/logger.ts` with Pino configuration\n- Created extension-side logger ",
+      "timestamp": "2026-08-19 16:31:21.400492",
+      "project": "run-e5719851",
+      "tags": [
+        "archive"
+      ]
+    },
+    {
+      "source": ".factory/archive/experiment-004.md",
+      "content": "---\ntags: [factory, experiment, second-brain]\nproject: second-brain\nexperiment_id: 4\nverdict: keep\nscore_delta: +0.0184\ndate: 2026-08-19\nsource: factory-archivist\n---\n\n# Experiment #4: Manual Capture Features (Context Menu + Keyboard Shortcut)\n\n## Result\n**KEEP** \u2014 Composite score improved from 0.5865 to 0.6049 (+0.0184). Re-attempt of Cycle 1 manual capture features, now successful with architecture fix.\n\nKey dimension improvements:\n- `experiment_diversity`: 0.5 \u2192 0.686 (+0.186)\n- `factory_effe",
+      "timestamp": "2026-08-19 16:31:21.400526",
+      "project": "run-e5719851",
+      "tags": [
+        "archive"
+      ]
+    },
+    {
+      "source": ".factory/archive/memory/context.md",
+      "content": "## Episodic Memory (Task-Relevant)\n\n============================================================\n  Results for: \"# Interaction Study \u2014   Analyzed 3 conversation log(s), 9 relevant messages.  ## User Messages (3)\"\n  Wing: project:/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851\n============================================================\n\n  [1] project:/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851 / experiments\n      Source: current.md\n      ",
+      "timestamp": "2026-08-19 16:31:21.400599",
+      "project": "run-e5719851",
+      "tags": [
+        "archive"
+      ]
+    },
+    {
+      "source": ".factory/archive/memory/decisions.md",
+      "content": "\n============================================================\n  Results for: \"decision rationale tradeoff\"\n  Wing: project:/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851\n  Room: decisions\n============================================================\n\n  [1] project:/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851 / decisions\n      Source: verdict.json\n      Match:  cosine_sim=0.049  bm25=0.0\n\n      {\n        \"id\": 1,\n        \"timestamp\": \"2026-",
+      "timestamp": "2026-08-19 16:31:21.400633",
+      "project": "run-e5719851",
+      "tags": [
+        "archive"
+      ]
+    },
+    {
+      "source": ".factory/archive/memory/episodes.md",
+      "content": "\n============================================================\n  Results for: \"# Interaction Study \u2014   Analyzed 3 conversation log(s), 9 relevant messages.  ## User Messages (3)\"\n  Wing: project:/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851\n============================================================\n\n  [1] project:/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851 / experiments\n      Source: current.md\n      Match:  cosine_sim=0.218  bm25=3.92",
+      "timestamp": "2026-08-19 16:31:21.400680",
+      "project": "run-e5719851",
+      "tags": [
+        "archive"
+      ]
+    },
+    {
+      "source": ".factory/archive/memory/facts.md",
+      "content": "/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851 has_hypothesis H1: Add manual capture features \u2014 popup button, context menu, keyboard shortcut\n/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851 has_hypothesis H2: Add Pino structured logging to pipeline and shared modules\n/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851 rejected_approach **Don't fix the factory meta-eval tests discrepancy in these hypotheses:** The tests",
+      "timestamp": "2026-08-19 16:31:21.400716",
+      "project": "run-e5719851",
+      "tags": [
+        "archive"
+      ]
+    },
+    {
+      "source": ".factory/archive/memory/outcomes.md",
+      "content": "\n============================================================\n  Results for: \"experiment verdict keep revert\"\n  Wing: project:/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851\n  Room: experiments\n============================================================\n\n  [1] project:/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851 / experiments\n      Source: current.md\n      Match:  cosine_sim=0.2  bm25=0.575\n\n      ## Strategy \u2014 2026-08-19\n      \n      ###",
+      "timestamp": "2026-08-19 16:31:21.400751",
+      "project": "run-e5719851",
+      "tags": [
+        "archive"
+      ]
+    },
+    {
+      "source": ".factory/archive/memory/reviews.md",
+      "content": "\n============================================================\n  Results for: \"code review issues findings\"\n  Wing: project:/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851\n  Room: reviews\n============================================================\n\n  [1] project:/Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851 / reviews\n      Source: code-review.md\n      Match:  cosine_sim=0.143  bm25=2.923\n\n      # Code Review \u2014 Manual Capture Features\n      ",
+      "timestamp": "2026-08-19 16:31:21.400795",
+      "project": "run-e5719851",
+      "tags": [
+        "archive"
+      ]
+    },
+    {
+      "source": ".factory/archive/memory/timeline.md",
+      "content": "2026-08-19: /Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851 has_hypothesis H1: Add manual capture features \u2014 popup button, context menu, keyboard shortcut\n2026-08-19: /Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851 has_hypothesis H2: Add Pino structured logging to pipeline and shared modules\n2026-08-19: /Users/ggiannon/Documents/gcg/second-brain/.factory-worktrees/run-e5719851 rejected_approach **Don't fix the factory meta-eval tests discrepa",
+      "timestamp": "2026-08-19 16:31:21.400831",
+      "project": "run-e5719851",
+      "tags": [
+        "archive"
+      ]
+    }
+  ],
+  "verdict_patterns": {
+    "build-h3:PROCEED": 1,
+    "build-h4:PROCEED": 1,
+    "build:PROCEED": 1,
+    "discover:PROCEED": 1,
+    "doc-freshness:PROCEED": 1,
+    "e2e:PROCEED": 1,
+    "eval:PROCEED": 1,
+    "qa:PROCEED": 1,
+    "research:PROCEED": 1,
+    "strategy:PROCEED": 1
+  }
+}

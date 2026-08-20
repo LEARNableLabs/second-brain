@@ -1,5 +1,8 @@
 import { vi } from 'vitest';
 
+// WXT auto-import globals
+(globalThis as any).defineBackground = (fn: () => void) => fn;
+
 // Mock chrome/browser extension APIs for testing
 // This allows webextension-polyfill to load without throwing errors
 // Set up chrome global BEFORE webextension-polyfill loads

@@ -1,0 +1,26 @@
+{
+  "experiment_id": 1,
+  "hypothesis": "Add manual capture features — popup button, context menu, keyboard shortcut",
+  "category": "EXPLORE",
+  "verdict": "revert",
+  "score_before": 0.306,
+  "score_after": 0.308,
+  "score_delta": 0.002,
+  "dimensions_changed": {},
+  "ceo_rationale": "Score improved with zero regressions. All 166 tests pass, health_check/code_review/adversarial_tester all PASS. Force-reverted by precheck gate (composite 0.308 < threshold 0.5) due to pre-existing factory meta-eval bug: tests dimension scores 0 despite npm test passing. Not a code quality issue.",
+  "learned": "Factory meta-eval tests dimension is broken for this monorepo project — reports 0 tests passing when npm test shows 166 passing. This is the #1 blocker for the next cycle; no experiment can pass precheck until fixed.",
+  "anti_patterns": [
+    "Don't rely on precheck gate verdict when there's a known meta-eval bug — inspect QA agent verdicts instead"
+  ],
+  "playbook_proposals": [
+    {
+      "role": "ceo",
+      "type": "DO",
+      "content": "Before starting the next experiment cycle, fix the factory meta-eval tests dimension. It's blocking all experiments from passing precheck.",
+      "confidence": "high"
+    }
+  ],
+  "issue": [6, 7, 8],
+  "pr": 12,
+  "date": "2026-08-19"
+}

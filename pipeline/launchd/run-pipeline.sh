@@ -17,9 +17,17 @@ log() {
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
 }
 
+# launchd runs with a minimal PATH that won't include nvm/fnm-managed node.
+# Source the user's node version manager so npx is available.
+if [ -s "${HOME}/.nvm/nvm.sh" ]; then
+  export NVM_DIR="${HOME}/.nvm"
+  . "$NVM_DIR/nvm.sh"
+elif [ -x "$(command -v fnm 2>/dev/null)" ]; then
+  eval "$(fnm env)"
+fi
+
 log "Starting pipeline run for ${DATE} (hour: ${HOUR})"
 
-# Resolve npx path
 NPX=$(command -v npx || echo "/usr/local/bin/npx")
 
 cd "$PROJECT_DIR"

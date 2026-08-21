@@ -34,66 +34,70 @@ Chrome/Comet browser
 
 1. **Browser Extension** (`extension/`) -- A WXT-based Chrome/Comet extension that silently tracks page visits with dwell-time filtering (5s minimum), smart blocklist (Gmail, social media, banking filtered out), and a popup UI for pause/quick-block controls.
 
-2. **CLI Pipeline** (`pipeline/`) -- A Node.js CLI (`second-brain`) with six commands:
+2. **CLI Pipeline** (`pipeline/`) -- A Node.js CLI (`second-brain`) with seven commands:
    - `second-brain export` -- Pulls captures from the extension into SQLite via Chrome Native Messaging
    - `second-brain generate` -- Writes Obsidian-compatible markdown daily notes from captures
    - `second-brain fetch` -- Extracts full page content (arxiv API, article extraction, enhanced meta)
    - `second-brain curate` -- AI-generates summaries with topic clustering and [[wikilinks]]
    - `second-brain capture-conversation` -- Logs Claude Code conversation topics to daily note
    - `second-brain email` -- Sends morning email digest via Gmail/gws
+   - `second-brain search` -- Full-text search across captures and daily notes
 
 3. **Shared Types** (`shared/`) -- Zod schemas and TypeScript types shared between extension and pipeline.
 
 ## Prerequisites
 
-- macOS
-- Node.js >= 20
-- npm >= 10
-- Chrome and/or Comet browser
+- macOS (launchd scheduling is macOS-only)
+- [Node.js](https://nodejs.org/) >= 20 and npm >= 10
+- Chrome and/or [Comet](https://browser.horse/) browser
 
-## Install
+## Quick Start
 
 ```bash
-# Clone and install dependencies
 git clone https://github.com/LEARNableLabs/second-brain.git
 cd second-brain
-npm install
+./setup.sh
 ```
 
-### 1. Build and load the browser extension
+This installs dependencies, builds the extension, and creates `~/.second-brain/`. It then prompts you to load the extension in Chrome:
+
+1. Open `chrome://extensions` and enable **Developer Mode**
+2. Click **Load unpacked** → select `extension/.output/chrome-mv3`
+3. Copy the extension ID, then finish setup:
 
 ```bash
-# Build the extension
-npm run build --workspace=extension
-
-# Or run in dev mode with hot reload
-npm run dev --workspace=extension
+./setup.sh <your-extension-id>
 ```
 
-Load the unpacked extension in Chrome:
-1. Open `chrome://extensions`
-2. Enable **Developer Mode**
-3. Click **Load unpacked**
-4. Select `extension/.output/chrome-mv3`
-5. Copy the extension ID shown under "Second Brain Capture"
+That's it. Verify with `npx second-brain --help`.
 
-### 2. Set up native messaging (connects extension to CLI)
+## Configuration (optional)
 
-```bash
-# Install the native messaging host manifest for Chrome/Comet
-./pipeline/manifests/install-host.sh <your-extension-id>
-```
-
-Restart Chrome/Comet after installing.
-
-### 3. Configure output directory (optional)
-
-By default, daily notes are written to `~/Documents/Obsidian/second-brain/`. To change this:
+Configuration lives at `~/.second-brain/config.json`:
 
 ```bash
 mkdir -p ~/.second-brain
-echo '{"outputDir": "/absolute/path/to/your/obsidian/vault"}' > ~/.second-brain/config.json
 ```
+
+**Output directory** — daily notes are written to `~/Documents/Obsidian/second-brain/` by default:
+
+```json
+{"outputDir": "/absolute/path/to/your/obsidian/vault"}
+```
+
+**AI provider** — defaults to `claude-code` (Claude Code CLI, no API key needed). Alternatives:
+
+```json
+{"llm": {"provider": "claude"}}
+```
+
+Requires `ANTHROPIC_API_KEY` in your environment.
+
+```json
+{"llm": {"provider": "ollama", "model": "llama3.1"}}
+```
+
+Fully local and private — requires [Ollama](https://ollama.ai/) running.
 
 ## Usage
 
@@ -117,6 +121,15 @@ npx second-brain email                     # Send yesterday's digest via Gmail
 
 All commands support `--date YYYY-MM-DD` and `--dry` flags.
 
+### Search your captures
+
+```bash
+npx second-brain search "transformer attention"
+npx second-brain search "react hooks" --from 2026-01-01 --domain dev.to
+npx second-brain search "RLHF" --notes-only        # search daily notes only
+npx second-brain search "arxiv" --db-only           # search captures DB only
+```
+
 ### Capture Claude Code conversations
 
 ```bash
@@ -130,18 +143,6 @@ npx second-brain capture-conversation --topic "RL training loop" --summary "Disc
 ```
 
 This installs a launchd agent that runs the full pipeline every hour. End-of-day summary at 11 PM, morning email digest at 8 AM. Logs at `~/.second-brain/logs/second-brain.log`.
-
-### Configure AI provider
-
-By default, curate uses `claude -p` (Claude Code CLI) — no API key needed if you have Claude Code installed. Alternative providers:
-
-```bash
-# Use Ollama (local, fully private)
-echo '{"llm": {"provider": "ollama", "model": "llama3.1"}}' > ~/.second-brain/config.json
-
-# Use Claude API directly (requires ANTHROPIC_API_KEY env var)
-echo '{"llm": {"provider": "claude"}}' > ~/.second-brain/config.json
-```
 
 Each daily note includes:
 - AI-curated highlights with topic clusters and [[wikilinks]]
@@ -158,19 +159,20 @@ second-brain/
   extension/          # Browser extension (WXT + TypeScript)
     components/       #   Storage, types, dwell tracking, blocklist
     entrypoints/      #   Background service worker, popup UI
-    tests/            #   48 tests
+    tests/            #   83 tests
   pipeline/           # CLI pipeline (Node.js + TypeScript)
     src/
       ai/             #   LLM provider abstraction, curation prompt, vault scanner
-      commands/       #   export, generate, fetch, curate, email, capture-conversation
+      commands/       #   export, generate, fetch, curate, email, capture-conversation, search
       config/         #   Config reader with Zod validation
       db/             #   SQLite connection, migrations, operations, content table
       extractors/     #   Domain-aware content extraction (arxiv, article, general)
       generators/     #   Markdown engine, frontmatter, meta fetcher, atomic writer
       git/            #   Auto-commit to output repo
       messaging/      #   Chrome Native Messaging protocol
+      search/         #   Full-text search across notes and captures
     launchd/          #   macOS launchd agent for hourly automation
-    tests/            #   78 tests
+    tests/            #   101 tests
   shared/             # Shared Zod schemas and types
     src/
     tests/

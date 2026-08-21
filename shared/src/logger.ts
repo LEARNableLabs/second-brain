@@ -1,7 +1,7 @@
 import pino from 'pino';
 
 const rootLogger = pino({
-  level: process.env.LOG_LEVEL || 'info',
+  level: process.env.LOG_LEVEL || 'warn',
   timestamp: pino.stdTimeFunctions.isoTime,
 });
 

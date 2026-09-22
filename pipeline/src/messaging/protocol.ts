@@ -20,6 +20,14 @@ export function createOutputStream(): Transform {
 export function readMessage(): Promise<any> {
   return new Promise((resolve, reject) => {
     let buffer = Buffer.alloc(0);
+    function cleanup() {
+      process.stdin.removeListener('data', onData);
+      process.stdin.removeListener('error', onError);
+      process.stdin.removeListener('end', onEnd);
+      process.stdin.pause();
+    }
+    function onError(error: Error) { cleanup(); reject(error); }
+    function onEnd() { onError(new Error('Incomplete native message')); }
 
     function onData(chunk: Buffer) {
       buffer = Buffer.concat([buffer, chunk]);
@@ -28,11 +36,14 @@ export function readMessage(): Promise<any> {
       if (buffer.length < 4) return;
 
       const messageLength = buffer.readUInt32LE(0);
+      if (messageLength === 0 || messageLength > 64 * 1024 * 1024) {
+        onError(new Error('Invalid native message length'));
+        return;
+      }
       if (buffer.length < 4 + messageLength) return;
 
       // We have a complete message
-      process.stdin.removeListener('data', onData);
-      process.stdin.removeListener('error', reject);
+      cleanup();
 
       const json = buffer.subarray(4, 4 + messageLength).toString('utf-8');
       try {
@@ -43,7 +54,8 @@ export function readMessage(): Promise<any> {
     }
 
     process.stdin.on('data', onData);
-    process.stdin.on('error', reject);
+    process.stdin.on('error', onError);
+    process.stdin.on('end', onEnd);
   });
 }
 

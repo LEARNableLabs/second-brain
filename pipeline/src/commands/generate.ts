@@ -1,4 +1,6 @@
 import path from 'path';
+import { promises as fs } from 'fs';
+import { localDate, parseDate } from '../config/date.js';
 import crypto from 'crypto';
 import { getDatabase, closeDatabase } from '../db/connection.js';
 import { migrate } from '../db/migrate.js';
@@ -18,7 +20,7 @@ interface GenerateOptions {
 export async function generateCommand(options: GenerateOptions = {}): Promise<void> {
   const requestId = crypto.randomUUID();
   const logger = createRequestLogger('cmd:generate', requestId);
-  const date = options.date || new Date().toISOString().split('T')[0];
+  const date = options.date ? parseDate(options.date) : localDate();
   logger.info({ requestId, date }, 'generate command started');
   console.error(`Generating daily note for ${date}...`);
 
@@ -41,8 +43,16 @@ export async function generateCommand(options: GenerateOptions = {}): Promise<vo
 
     console.error(`Found ${captures.length} captures for ${date}`);
 
-    const descriptions = await fetchAllDescriptions(captures.map(c => c.url));
-    const markdown = generateDailyNote(date, captures, descriptions);
+    const descriptions = await fetchAllDescriptions(captures.map(c => c.url).filter(url => /^https?:\/\//.test(url)));
+    // Preserve existing highlights if AI curation is unavailable on this run.
+    let summary: string | undefined;
+    try {
+      const existing = await fs.readFile(path.join(outputDir, `${date}.md`), 'utf8');
+      summary = existing.match(/(^## Highlights\r?\n[\s\S]*?)(?=^## Browsing Log\s*$)/m)?.[1].trimEnd();
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+    }
+    const markdown = generateDailyNote(date, captures, descriptions, summary);
 
     if (options.dry) {
       console.log(markdown);
@@ -57,7 +67,7 @@ export async function generateCommand(options: GenerateOptions = {}): Promise<vo
     console.error(`Wrote ${filepath}`);
 
     for (const capture of captures) {
-      updateStatus(db, capture.url, date, 'written');
+      if (capture.status === 'captured') updateStatus(db, capture.url, date, 'written');
     }
 
     const committed = await autoCommitNotes(outputDir, [filename]);

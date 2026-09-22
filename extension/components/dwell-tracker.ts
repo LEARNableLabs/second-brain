@@ -105,17 +105,22 @@ export async function checkDwell(tabId: number): Promise<boolean> {
   // Calculate elapsed time
   const elapsed = Date.now() - record.startTime;
 
-  // Clean up the record from storage
-  delete dwellTimestamps[String(tabId)];
-  await browser.storage.local.set({ dwellTimestamps });
-
   // Check if elapsed time meets threshold
   if (elapsed < DWELL_THRESHOLD_MS) {
     return false;
   }
 
+  delete dwellTimestamps[String(tabId)];
+  await browser.storage.local.set({ dwellTimestamps });
+
   // Elapsed time >= 5000ms - check blocklist before capturing
   try {
+    const { isPaused } = await browser.storage.local.get('isPaused');
+    if (isPaused) return false;
+    const tab = await browser.tabs.get(tabId);
+    if (!tab.active || tab.url !== record.url || tab.windowId === undefined) return false;
+    const window = await browser.windows.get(tab.windowId);
+    if (!window.focused) return false;
     const url = new URL(record.url);
     const hostname = url.hostname;
 

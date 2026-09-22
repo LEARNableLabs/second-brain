@@ -1,6 +1,7 @@
 import browser from 'webextension-polyfill';
 import { CaptureEntry, CaptureEntrySchema, StorageState, StorageStateSchema } from './types';
 import { createModuleLogger } from './logger';
+import { withCaptureLock } from './capture-lock';
 
 const logger = createModuleLogger('storage');
 
@@ -44,6 +45,10 @@ export function getToday(): string {
  * @returns true if saved, false if already exists (duplicate)
  */
 export async function saveCapture(entry: CaptureEntry): Promise<boolean> {
+  return withCaptureLock(() => saveCaptureUnlocked(entry));
+}
+
+async function saveCaptureUnlocked(entry: CaptureEntry): Promise<boolean> {
   logger.info({ url: entry.url }, 'saving capture');
   const today = getToday();
   const result = await browser.storage.local.get('captures');
@@ -77,6 +82,10 @@ export async function saveCapture(entry: CaptureEntry): Promise<boolean> {
  * @returns true if saved or upgraded, false on error
  */
 export async function saveManualCapture(url: string, title: string, domain: string): Promise<boolean> {
+  return withCaptureLock(() => saveManualCaptureUnlocked(url, title, domain));
+}
+
+async function saveManualCaptureUnlocked(url: string, title: string, domain: string): Promise<boolean> {
   logger.info({ url }, 'saving manual capture');
   const today = getToday();
   const result = await browser.storage.local.get('captures');

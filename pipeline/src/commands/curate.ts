@@ -1,4 +1,5 @@
 import path from 'path';
+import { localDate, parseDate } from '../config/date.js';
 import { getDatabase, closeDatabase } from '../db/connection.js';
 import { migrate } from '../db/migrate.js';
 import { getByDate, updateStatus } from '../db/operations.js';
@@ -19,7 +20,7 @@ interface CurateOptions {
 }
 
 export async function curateCommand(options: CurateOptions = {}): Promise<void> {
-  const date = options.date || new Date().toISOString().split('T')[0];
+  const date = options.date ? parseDate(options.date) : localDate();
   const isEndOfDay = options.eod || false;
   console.error(`Curating daily note for ${date}${isEndOfDay ? ' (end-of-day)' : ''}...`);
 
@@ -68,9 +69,10 @@ export async function curateCommand(options: CurateOptions = {}): Promise<void> 
       vaultNotes,
       isEndOfDay
     );
+    if (!summary.startsWith('## Highlights')) throw new Error('AI response is missing the Highlights section');
 
     // Regenerate the full daily note with AI summary injected
-    const descriptions = await fetchAllDescriptions(allCaptures.map(c => c.url));
+    const descriptions = await fetchAllDescriptions(allCaptures.map(c => c.url).filter(url => /^https?:\/\//.test(url)));
     const markdown = generateDailyNote(date, allCaptures, descriptions, summary);
 
     if (options.dry) {

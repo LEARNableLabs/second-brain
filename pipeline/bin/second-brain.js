@@ -1,2 +1,4 @@
-#!/usr/bin/env -S node --import tsx
-import '../src/index.ts';
+#!/usr/bin/env node
+import { register } from 'tsx/esm/api';
+register();
+await import('../src/index.ts');

@@ -8,6 +8,7 @@ RESET='\033[0m'
 step() { echo -e "\n${BOLD}[$1/4]${RESET} $2"; }
 
 EXTENSION_ID="${1:-}"
+cd "$(dirname "$0")"
 
 step 1 "Installing dependencies"
 npm install --silent

@@ -29,6 +29,10 @@ const mockStorageAPI = {
 
 // Update chrome global (webextension-polyfill reads from chrome, not browser)
 (globalThis as any).chrome.storage.local = mockStorageAPI;
+(globalThis as any).chrome.tabs.get = vi.fn(async (tabId: number) => ({
+  active: true, windowId: 1, url: mockStorage.dwellTimestamps?.[String(tabId)]?.url || 'https://example.com',
+}));
+(globalThis as any).chrome.windows = { get: vi.fn(async () => ({ focused: true })) };
 
 // Mock storage.saveCapture
 vi.mock('../components/storage', async () => {
@@ -220,8 +224,8 @@ describe('checkDwell', () => {
     const result = await checkDwell(123);
 
     expect(result).toBe(false);
-    // Record should be cleaned up
-    expect(mockStorage.dwellTimestamps['123']).toBeUndefined();
+    // An earlier navigation's timer must not erase the current dwell record.
+    expect(mockStorage.dwellTimestamps['123']).toBeDefined();
   });
 
   it('calls saveCapture when elapsed time >= DWELL_THRESHOLD_MS', async () => {

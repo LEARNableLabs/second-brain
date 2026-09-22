@@ -25,6 +25,7 @@ export function saveCaptures(db: Database.Database, entries: CaptureEntry[]): { 
   `);
 
   const insertMany = db.transaction((entries: CaptureEntry[]) => {
+    const upgrade = db.prepare("UPDATE captures SET source = 'manual' WHERE url = ? AND date = ? AND source != 'manual'");
     let inserted = 0;
     for (const entry of entries) {
       const result = insert.run({
@@ -36,6 +37,7 @@ export function saveCaptures(db: Database.Database, entries: CaptureEntry[]): { 
         source: entry.source,
       });
       if (result.changes > 0) inserted++;
+      if (entry.source === 'manual') upgrade.run(entry.url, timestampToDate(entry.timestamp));
     }
     return inserted;
   });

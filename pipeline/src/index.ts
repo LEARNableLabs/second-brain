@@ -16,9 +16,10 @@ program
 
 program
   .command('export')
-  .description('Export captures from browser extension to SQLite database')
+  .description('Import a legacy export.json snapshot (browser captures sync automatically)')
   .option('--dry-run', 'Show what would be exported without writing to database')
-  .action(exportCommand);
+  .option('--dry', 'Alias for --dry-run')
+  .action((options) => exportCommand({ dryRun: options.dryRun || options.dry }));
 
 program
   .command('generate')
@@ -53,6 +54,8 @@ program
   .command('email')
   .description('Send morning email digest of yesterday\'s highlights')
   .option('--date <YYYY-MM-DD>', 'Send digest for specific date (defaults to yesterday)')
+  .option('--dry', 'Preview the digest without sending email')
+  .option('--to <email>', 'Recipient (defaults to configured recipient or signed-in Gmail user)')
   .action(emailCommand);
 
 program
@@ -66,4 +69,7 @@ program
   .option('--db-only', 'Search only the captures database')
   .action(searchCommand);
 
-program.parse();
+program.parseAsync().catch((error: Error) => {
+  console.error(error.message);
+  process.exitCode = 1;
+});

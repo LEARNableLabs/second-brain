@@ -1,6 +1,7 @@
 import { getDatabase, closeDatabase } from '../db/connection.js';
 import { migrate } from '../db/migrate.js';
-import { saveCaptures } from '../db/operations.js';
+import { saveCaptures, updateStatus } from '../db/operations.js';
+import { localDate } from '../config/date.js';
 
 interface CaptureConversationOptions {
   topic: string;
@@ -35,7 +36,7 @@ export async function captureConversationCommand(options: CaptureConversationOpt
       // If summary provided, save it as content too
       if (options.summary) {
         const { saveContent } = await import('../db/content-operations.js');
-        const date = new Date(now).toISOString().split('T')[0];
+        const date = localDate(new Date(now));
         saveContent(db, entry.url, date, {
           title: `[Claude Code] ${options.topic}`,
           body: options.summary,
@@ -43,6 +44,7 @@ export async function captureConversationCommand(options: CaptureConversationOpt
           wordCount: options.summary.split(/\s+/).length,
           extractedAt: now,
         });
+        updateStatus(db, entry.url, date, 'content_fetched');
         console.error('Summary saved for AI curation');
       }
     } else {

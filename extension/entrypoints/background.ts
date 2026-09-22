@@ -6,6 +6,7 @@ import { detectGap, backfillHistory } from '../components/history-backfill';
 import { loadStorage, saveStorage, saveManualCapture } from '../components/storage';
 import { createModuleLogger } from '../components/logger';
 import type { CaptureEntry } from '../components/types';
+import { syncCaptures } from '../components/native-sync';
 
 const logger = createModuleLogger('background');
 
@@ -79,6 +80,7 @@ export async function handleTabActivated(
   activeInfo: Tabs.OnActivatedActiveInfoType
 ): Promise<void> {
   try {
+    await saveStorage({ dwellTimestamps: {} });
     // Load pause state
     const { isPaused } = await browser.storage.local.get('isPaused');
     if (isPaused) return;
@@ -236,8 +238,7 @@ export async function handleCommand(command: string): Promise<void> {
 }
 
 /**
- * Handle export request: return all captures from chrome.storage
- * D-03: Mark captures with exportedAt timestamp for 7-day retention tracking
+ * Return a read-only capture snapshot for extension callers.
  */
 export async function handleGetCaptures(): Promise<{
   captures: Record<string, CaptureEntry[]>;
@@ -247,24 +248,7 @@ export async function handleGetCaptures(): Promise<{
   const captures = state.captures || {};
   const exportedAt = Date.now();
 
-  // D-03: Store export timestamp for 7-day retention tracking
-  // Clean up entries older than 7 days since last export
-  const sevenDaysAgo = exportedAt - (7 * 24 * 60 * 60 * 1000);
-  const retainedCaptures: Record<string, CaptureEntry[]> = {};
-  for (const [dateKey, entries] of Object.entries(captures)) {
-    // Parse date key to check age
-    const dateMs = new Date(dateKey + 'T00:00:00').getTime();
-    if (dateMs >= sevenDaysAgo) {
-      retainedCaptures[dateKey] = entries;
-    }
-  }
-
-  // Save cleaned captures and export timestamp back to storage
-  await saveStorage({
-    captures: retainedCaptures,
-    lastExportTimestamp: exportedAt,
-  } as any); // lastExportTimestamp is new -- extend StorageState in future cleanup
-
+  // Reading a snapshot must never delete data or imply a successful export.
   return { captures, exportedAt };
 }
 
@@ -277,10 +261,28 @@ export default defineBackground(() => {
 
   // Register all event listeners synchronously
   browser.webNavigation.onCompleted.addListener(handlePageLoad);
+  browser.webNavigation.onBeforeNavigate.addListener((details) => {
+    if (details.frameId === 0) void cancelTracking(details.tabId);
+  });
   browser.tabs.onActivated.addListener(handleTabActivated);
   browser.tabs.onRemoved.addListener(handleTabRemoved);
   browser.runtime.onInstalled.addListener(handleInstall);
   browser.runtime.onStartup.addListener(handleStartup);
+  browser.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && changes.captures) void syncCaptures();
+    if (area === 'local' && changes.isPaused?.newValue) void saveStorage({ dwellTimestamps: {} });
+  });
+  browser.windows.onFocusChanged.addListener(async (windowId) => {
+    await saveStorage({ dwellTimestamps: {} });
+    if (windowId === browser.windows.WINDOW_ID_NONE) return;
+    const [tab] = await browser.tabs.query({ active: true, windowId });
+    if (tab?.id !== undefined) await handleTabActivated({ tabId: tab.id, windowId });
+  });
+  browser.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === 'sync-captures') void syncCaptures();
+  });
+  void browser.alarms.create('sync-captures', { periodInMinutes: 5 });
+  void syncCaptures();
 
   // Context menu click handler (menu items registered in handleInstall)
   browser.contextMenus.onClicked.addListener(handleContextMenuClick);
@@ -288,11 +290,14 @@ export default defineBackground(() => {
   // Keyboard shortcut handler
   browser.commands.onCommand.addListener(handleCommand);
 
-  // Handle messages from native messaging host (Phase 2: Data Export Pipeline)
-  // The CLI triggers export by launching the native host, which sends a message to the extension.
-  // Extension responds with current captures from chrome.storage.
+  // Handle requests from the popup. Only the extension can initiate native messaging.
   browser.runtime.onMessage.addListener(async (message: unknown) => {
-    if ((message as { action?: string }).action === 'getCaptures') {
+    if ((message as { action?: string })?.action === 'syncCaptures') {
+      await syncCaptures();
+      const state = await loadStorage();
+      return { success: !state.syncError, error: state.syncError };
+    }
+    if ((message as { action?: string })?.action === 'getCaptures') {
       try {
         return await handleGetCaptures();
       } catch (err) {

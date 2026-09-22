@@ -252,7 +252,7 @@ describe('generateDailyNote', () => {
     expect(note).toContain('---');
     expect(note).toMatch(/date: ['"]2026-04-10['"]/);
     expect(note).toContain('## Highlights');
-    expect(note).toContain('*AI-curated summary will appear here after Phase 5*');
+    expect(note).toContain('*Highlights will appear after the next successful curation.*');
     expect(note).toContain('## Browsing Log');
   });
 

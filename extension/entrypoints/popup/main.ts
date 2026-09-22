@@ -69,6 +69,11 @@ export async function initPopup(): Promise<void> {
   // Load pause state
   const storage = await loadStorage();
   const isPaused = storage.isPaused || false;
+  const syncStatus = document.getElementById('syncStatus');
+  if (syncStatus) syncStatus.textContent = storage.syncError
+    ? 'Saved in browser. Local sync unavailable — finish setup, then retry.'
+    : storage.lastExportTimestamp ? `Synced ${formatTimeAgo(Date.now() - storage.lastExportTimestamp)}`
+    : 'Saved in browser. Waiting for first sync.';
 
   // Set toggle state
   const pauseToggle = document.getElementById('pauseToggle') as HTMLInputElement;
@@ -173,7 +178,7 @@ function attachEventListeners(): void {
       const isPaused = target.checked;
 
       // Persist pause state
-      await saveStorage({ isPaused });
+      await saveStorage({ isPaused, lastCaptureTimestamp: Date.now() });
 
       // Update UI
       updatePauseUI(isPaused);
@@ -195,6 +200,13 @@ function attachEventListeners(): void {
         saveButton.classList.add('saved');
         saveButton.disabled = true;
         showToast('Page saved — will appear in highlights');
+        const count = document.getElementById('todayCount');
+        if (count) count.textContent = String(await getTodayCount());
+        document.getElementById('emptyState')?.classList.remove('visible');
+        const stats = document.getElementById('statsSection');
+        if (stats) stats.style.display = 'grid';
+        const last = document.getElementById('lastCapture');
+        if (last) last.textContent = 'just now';
       } catch (error) {
         console.error('Failed to save manually:', error);
         showToast('Failed to save page');
@@ -211,6 +223,9 @@ function attachEventListeners(): void {
 
       try {
         await addToBlocklist(domain);
+        blockButton.disabled = true;
+        blockButton.textContent = `Skipping: ${domain}`;
+        blockButton.classList.add('already-skipped');
         showToast(`Skipped: ${domain}`);
       } catch (error) {
         console.error('Failed to add to blocklist:', error);
@@ -222,12 +237,63 @@ function attachEventListeners(): void {
   // Edit blocked sites link
   const editLink = document.getElementById('editLink');
   if (editLink) {
-    editLink.addEventListener('click', (e) => {
+    editLink.addEventListener('click', async (e) => {
       e.preventDefault();
-      // D-10: No options page in Phase 1 - show informational toast
-      showToast('Edit skiplist.json to manage skipped sites.');
+      const editor = document.getElementById('skipEditor');
+      const input = document.getElementById('skippedDomains') as HTMLTextAreaElement | null;
+      if (!editor || !input) return;
+      editor.hidden = !editor.hidden;
+      if (!editor.hidden) {
+        input.value = (await loadBlocklist()).join('\n');
+        input.focus();
+      }
     });
   }
+
+  document.getElementById('skipEditor')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const input = document.getElementById('skippedDomains') as HTMLTextAreaElement;
+    const error = document.getElementById('skipError')!;
+    try {
+      const domains = parseSkippedDomains(input.value);
+      await saveStorage({ blocklist: domains });
+      error.textContent = '';
+      document.getElementById('skipEditor')!.hidden = true;
+      showToast('Skipped sites updated');
+      const button = document.getElementById('blockButton') as HTMLButtonElement | null;
+      const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+      if (button && tab?.url?.startsWith('http')) {
+        const domain = new URL(tab.url).hostname;
+        const skipped = isBlocked(domain, domains);
+        button.dataset.domain = domain;
+        button.disabled = skipped;
+        button.textContent = `${skipped ? 'Skipping' : 'Skip this domain'}: ${domain}`;
+        button.classList.toggle('already-skipped', skipped);
+      }
+    } catch (err) { error.textContent = (err as Error).message; }
+  });
+
+  const syncButton = document.getElementById('syncButton') as HTMLButtonElement | null;
+  syncButton?.addEventListener('click', async () => {
+    syncButton.disabled = true;
+    const status = document.getElementById('syncStatus')!;
+    status.textContent = 'Syncing…';
+    try {
+      const result = await browser.runtime.sendMessage({ action: 'syncCaptures' }) as { success?: boolean };
+      status.textContent = result?.success ? 'Synced just now' : 'Local sync unavailable. Run setup and retry.';
+    } catch { status.textContent = 'Local sync unavailable. Run setup and retry.'; }
+    finally { syncButton.disabled = false; }
+  });
+}
+
+export function parseSkippedDomains(value: string): string[] {
+  const domains = value.split(/\r?\n/).map(line => line.trim().toLowerCase()).filter(Boolean);
+  for (const domain of domains) {
+    if (!/^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)*[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(domain)) {
+      throw new Error(`Enter a domain without a URL or path: ${domain}`);
+    }
+  }
+  return [...new Set(domains)];
 }
 
 // Initialize on load

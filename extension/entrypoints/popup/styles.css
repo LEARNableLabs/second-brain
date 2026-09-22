@@ -285,3 +285,28 @@ input:checked + .slider:before {
 .toast.visible {
   opacity: 1;
 }
+
+button:focus-visible, a:focus-visible, textarea:focus-visible,
+input:focus-visible + .slider {
+  outline: 2px solid #2563EB;
+  outline-offset: 3px;
+}
+
+#skipEditor label, #skipError, .sync-status {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+#skippedDomains {
+  width: 100%;
+  margin: 8px 0;
+  padding: 8px;
+  border: 1px solid #D1D5DB;
+  border-radius: 6px;
+  resize: vertical;
+}
+
+#skipError { color: #B91C1C; overflow-wrap: anywhere; }
+.sync-status { border-top: 1px solid #E5E7EB; padding-top: 12px; color: #6B7280; }
+.sync-status button { background: none; border: 0; margin-top: 8px; color: #2563EB; }
+.btn-block { overflow-wrap: anywhere; }

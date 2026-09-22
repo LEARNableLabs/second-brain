@@ -1,4 +1,5 @@
 import pLimit from 'p-limit';
+import { localDate, parseDate } from '../config/date.js';
 import { getDatabase, closeDatabase } from '../db/connection.js';
 import { migrate } from '../db/migrate.js';
 import { getByDate, updateStatus } from '../db/operations.js';
@@ -14,7 +15,7 @@ const CONCURRENCY = 5;
 const ARXIV_DELAY_MS = 3000;
 
 export async function fetchCommand(options: FetchOptions = {}): Promise<void> {
-  const date = options.date || new Date().toISOString().split('T')[0];
+  const date = options.date ? parseDate(options.date) : localDate();
   console.error(`Fetching content for ${date}...`);
 
   const db = getDatabase();
@@ -25,9 +26,10 @@ export async function fetchCommand(options: FetchOptions = {}): Promise<void> {
     }
 
     // Get captures that have been written to daily note but not yet content-fetched
-    const captures = getByDate(db, date).filter(c => c.status === 'written');
+    const captures = getByDate(db, date).filter(c =>
+      (c.status === 'written' || c.status === 'captured') && /^https?:\/\//.test(c.url));
     if (captures.length === 0) {
-      console.error(`No captures with status 'written' for ${date}`);
+      console.error(`No web captures awaiting content for ${date}`);
       return;
     }
 
@@ -44,17 +46,16 @@ export async function fetchCommand(options: FetchOptions = {}): Promise<void> {
     const limit = pLimit(CONCURRENCY);
     let succeeded = 0;
     let failed = 0;
-    let lastArxivTime = 0;
+    let nextArxivTime = 0;
 
     const tasks = captures.map(capture =>
       limit(async () => {
         // Rate limit arxiv requests
         if (capture.domain === 'arxiv.org' || capture.domain.endsWith('.arxiv.org')) {
-          const elapsed = Date.now() - lastArxivTime;
-          if (elapsed < ARXIV_DELAY_MS) {
-            await new Promise(r => setTimeout(r, ARXIV_DELAY_MS - elapsed));
-          }
-          lastArxivTime = Date.now();
+          const scheduled = Math.max(Date.now(), nextArxivTime);
+          nextArxivTime = scheduled + ARXIV_DELAY_MS;
+          const delay = scheduled - Date.now();
+          if (delay > 0) await new Promise(r => setTimeout(r, delay));
         }
 
         try {
@@ -72,7 +73,9 @@ export async function fetchCommand(options: FetchOptions = {}): Promise<void> {
       })
     );
 
-    await Promise.allSettled(tasks);
+    const results = await Promise.allSettled(tasks);
+    const rejected = results.filter(result => result.status === 'rejected');
+    if (rejected.length) throw new AggregateError(rejected.map(result => result.reason), 'Content processing failed');
 
     console.error(`\nDone: ${succeeded} succeeded, ${failed} failed out of ${captures.length}`);
   } catch (err) {

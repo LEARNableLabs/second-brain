@@ -5,6 +5,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 HOST_PATH="$PROJECT_ROOT/pipeline/bin/native-host.js"
+NODE_PATH="$(command -v node)"
 
 # Validate host script exists
 if [ ! -f "$HOST_PATH" ]; then
@@ -31,19 +32,30 @@ COMET_HOST_DIR="$HOME/Library/Application Support/Comet/NativeMessagingHosts"
 
 MANIFEST_NAME="com.second_brain.export_host.json"
 
-# Generate manifest with actual paths
+# Bind the launcher to this Node installation; GUI browsers have a minimal PATH.
+if [[ ! "$EXTENSION_ID" =~ ^[a-p]{32}$ ]]; then
+  echo "ERROR: Extension ID must contain 32 lowercase letters from a to p"
+  exit 1
+fi
+LAUNCHER="$HOME/.second-brain/native-host.sh"
+mkdir -p "$(dirname "$LAUNCHER")"
+"$NODE_PATH" --input-type=module - "$NODE_PATH" "$HOST_PATH" "$LAUNCHER" <<'NODE'
+import fs from 'node:fs';
+const [node, host, launcher] = process.argv.slice(2);
+const quote = value => "'" + value.replaceAll("'", "'\\''") + "'";
+fs.writeFileSync(launcher, '#!/bin/sh\nexec ' + quote(node) + ' ' + quote(host) + '\n', { mode: 0o700 });
+fs.chmodSync(launcher, 0o700);
+NODE
+
 generate_manifest() {
-  cat <<MANIFEST
-{
-  "name": "com.second_brain.export_host",
-  "description": "Second Brain - Export browsing captures to local database",
-  "path": "$HOST_PATH",
-  "type": "stdio",
-  "allowed_origins": [
-    "chrome-extension://$EXTENSION_ID/"
-  ]
-}
-MANIFEST
+  "$NODE_PATH" --input-type=module - "$LAUNCHER" "$EXTENSION_ID" <<'NODE'
+const [host, id] = process.argv.slice(2);
+console.log(JSON.stringify({
+  name: 'com.second_brain.export_host',
+  description: 'Second Brain - Export browsing captures to local database',
+  path: host, type: 'stdio', allowed_origins: [`chrome-extension://${id}/`],
+}, null, 2));
+NODE
 }
 
 # Install for Chrome

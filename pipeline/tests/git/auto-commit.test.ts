@@ -18,6 +18,11 @@ describe('git/auto-commit', () => {
   });
 
   describe('ensureGitRepo', () => {
+    it('creates a missing output directory on first use', async () => {
+      const missing = path.join(testDir, 'new-vault');
+      await ensureGitRepo(missing);
+      expect(fs.existsSync(path.join(missing, '.git'))).toBe(true);
+    });
     it('initializes a new git repo in a non-git directory', async () => {
       await ensureGitRepo(testDir);
 
@@ -60,6 +65,16 @@ describe('git/auto-commit', () => {
     beforeEach(async () => {
       // Initialize git repo before each test
       await ensureGitRepo(testDir);
+    });
+
+    it('leaves unrelated staged changes out of the automated commit', async () => {
+      const git = simpleGit(testDir);
+      fs.writeFileSync(path.join(testDir, 'personal.md'), 'My unfinished note');
+      await git.add('personal.md');
+      fs.writeFileSync(path.join(testDir, '2026-04-10.md'), '# Daily Note');
+      await autoCommitNotes(testDir, ['2026-04-10.md']);
+      expect((await git.status()).staged).toContain('personal.md');
+      expect(await git.show(['--pretty=', '--name-only', 'HEAD'])).not.toContain('personal.md');
     });
 
     it('stages and commits specified .md files', async () => {

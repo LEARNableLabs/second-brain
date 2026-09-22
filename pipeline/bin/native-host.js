@@ -1,5 +1,7 @@
-#!/usr/bin/env -S node --import tsx
-import { runHost } from '../src/messaging/host.ts';
+#!/usr/bin/env node
+import { register } from 'tsx/esm/api';
+register();
+const { runHost } = await import('../src/messaging/host.ts');
 runHost().catch(err => {
   console.error('[native-host] Fatal error:', err);
   process.exit(1);

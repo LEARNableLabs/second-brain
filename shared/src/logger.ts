@@ -3,7 +3,7 @@ import pino from 'pino';
 const rootLogger = pino({
   level: process.env.LOG_LEVEL || 'warn',
   timestamp: pino.stdTimeFunctions.isoTime,
-});
+}, pino.destination(2));
 
 export function createModuleLogger(name: string) {
   return rootLogger.child({ module: name });

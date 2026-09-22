@@ -34,6 +34,8 @@ export const StorageStateSchema = z.object({
   blocklist: z.array(z.string()).default([]),
   captures: z.record(z.string(), z.array(CaptureEntrySchema)).default({}),
   lastCaptureTimestamp: z.number().default(0),
+  lastExportTimestamp: z.number().optional(),
+  syncError: z.string().optional(),
   dwellTimestamps: z.record(z.string(), z.object({
     url: z.string(),
     title: z.string(),

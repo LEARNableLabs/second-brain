@@ -15,7 +15,7 @@ Chrome/Comet browser
 [Browser Extension] -- passively captures URLs, titles, domains, timestamps
     |
     v  (native messaging)
-[Export]             -- pulls captures into local SQLite database
+[Native Host]        -- saves captures directly to local SQLite database
     |
     v
 [Generate]          -- creates Obsidian-compatible daily notes
@@ -35,7 +35,7 @@ Chrome/Comet browser
 1. **Browser Extension** (`extension/`) -- A WXT-based Chrome/Comet extension that silently tracks page visits with dwell-time filtering (5s minimum), smart blocklist (Gmail, social media, banking filtered out), and a popup UI for pause/quick-block controls.
 
 2. **CLI Pipeline** (`pipeline/`) -- A Node.js CLI (`second-brain`) with seven commands:
-   - `second-brain export` -- Pulls captures from the extension into SQLite via Chrome Native Messaging
+   - `second-brain export` -- Imports a legacy `export.json` snapshot into SQLite; current extensions sync directly
    - `second-brain generate` -- Writes Obsidian-compatible markdown daily notes from captures
    - `second-brain fetch` -- Extracts full page content (arxiv API, article extraction, enhanced meta)
    - `second-brain curate` -- AI-generates summaries with topic clustering and [[wikilinks]]
@@ -69,7 +69,9 @@ This installs dependencies, builds the extension, and creates `~/.second-brain/`
 ./setup.sh <your-extension-id>
 ```
 
-That's it. Verify with `npx second-brain --help`.
+Restart Chrome/Comet, then open the extension popup and click **Sync now**. Confirm that it says **Synced just now**. Verify the CLI with `npx second-brain --help`.
+
+When updating an existing installation, rerun `./setup.sh <your-extension-id>` and reload the extension at `chrome://extensions`. The new background retry alarm requires the `alarms` permission. If you move the checkout or change your Node installation, rerun setup to refresh the native host launcher.
 
 ## Configuration (optional)
 
@@ -99,6 +101,20 @@ Requires `ANTHROPIC_API_KEY` in your environment.
 
 Fully local and private — requires [Ollama](https://ollama.ai/) running.
 
+**Email digest** — requires an installed, authenticated `gws` CLI. By default the digest goes to the signed-in Gmail user; configure another recipient with:
+
+```json
+{"email": {"to": "you@example.com"}}
+```
+
+Preview without contacting Gmail:
+
+```bash
+npx second-brain email --date 2026-09-22 --dry
+```
+
+`--to you@example.com` overrides the configured recipient. Invalid configuration stops the command, preserving the selected output location and AI provider.
+
 ## Usage
 
 ### Browse normally
@@ -106,12 +122,14 @@ Fully local and private — requires [Ollama](https://ollama.ai/) running.
 The extension captures pages automatically. It filters out noise (Gmail, Google Search, social media, banking) and requires a 5s dwell time before logging a visit. Use the popup to:
 - Pause/resume capture
 - Quick-block the current domain
-- See capture stats
+- See capture stats and local sync status
+- Edit skipped domains directly in the popup
+- Retry a failed sync with **Sync now**
 
 ### Run the full pipeline manually
 
 ```bash
-npx second-brain export                    # Pull captures from extension
+npx second-brain export                    # Optional: import a legacy export.json snapshot
 npx second-brain generate                  # Create daily note
 npx second-brain fetch                     # Extract full page content
 npx second-brain curate                    # AI summary + topic clusters
@@ -119,7 +137,7 @@ npx second-brain curate --eod             # End-of-day polished summary
 npx second-brain email                     # Send yesterday's digest via Gmail
 ```
 
-All commands support `--date YYYY-MM-DD` and `--dry` flags.
+`generate`, `fetch`, `curate`, and `email` support `--date YYYY-MM-DD` and `--dry`. Dates use your local timezone. Export supports `--dry` or `--dry-run`; previews retain the snapshot for a later import. `curate --dry` still calls the configured AI provider to generate its preview.
 
 ### Search your captures
 
@@ -159,7 +177,7 @@ second-brain/
   extension/          # Browser extension (WXT + TypeScript)
     components/       #   Storage, types, dwell tracking, blocklist
     entrypoints/      #   Background service worker, popup UI
-    tests/            #   83 tests
+    tests/            #   Capture, sync, and popup regression tests
   pipeline/           # CLI pipeline (Node.js + TypeScript)
     src/
       ai/             #   LLM provider abstraction, curation prompt, vault scanner
@@ -172,7 +190,7 @@ second-brain/
       messaging/      #   Chrome Native Messaging protocol
       search/         #   Full-text search across notes and captures
     launchd/          #   macOS launchd agent for hourly automation
-    tests/            #   101 tests
+    tests/            #   CLI, database, messaging, and note regression tests
   shared/             # Shared Zod schemas and types
     src/
     tests/
@@ -189,8 +207,20 @@ npm test --workspace=extension
 npm test --workspace=pipeline
 
 # Type check
-npm run type-check --workspace=extension
+npm run type-check --workspaces --if-present
+
+# Build the extension and check pipeline compilation
+npm run build
 ```
+
+## Verification and troubleshooting
+
+- **Local sync unavailable:** rerun setup with the correct extension ID, restart the browser, and click **Sync now**. Captures remain queued in the browser until the native host confirms they are saved.
+- **No highlights:** check the selected AI provider. The default needs an authenticated Claude Code CLI; Ollama needs a running local server and the configured model. A failed curation preserves the previous highlights.
+- **No email:** preview the digest, then check `gws` authentication and the recipient. Email tests mock Gmail; the test suite never sends mail.
+- **Custom data location:** `SECOND_BRAIN_DATA_DIR` selects a separate database/config directory for CLI commands and tests. The browser host uses `~/.second-brain` by default.
+
+Automated checks cover framed native-host input in a separate process, database persistence, retries and retention, hourly note regeneration, conversation summaries, popup interactions, and email argument construction. Loading the unpacked extension, visual rendering in Chrome/Comet and Obsidian, real AI generation, and Gmail delivery still require a configured local installation.
 
 ## Roadmap
 

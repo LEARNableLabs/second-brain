@@ -79,7 +79,7 @@ export async function loadBlocklist(): Promise<string[]> {
   const blocklist = result.blocklist as string[] | undefined;
 
   // If blocklist not initialized, load and flatten defaults
-  if (!blocklist || blocklist.length === 0) {
+  if (!blocklist) {
     const defaultConfig = await loadDefaultBlocklist();
     const flattened = flattenBlocklist(defaultConfig);
 

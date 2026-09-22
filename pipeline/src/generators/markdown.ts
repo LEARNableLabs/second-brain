@@ -70,7 +70,7 @@ export function generateDailyNote(
     note += '\n' + aiSummary + '\n\n';
   } else {
     note += '\n## Highlights\n\n';
-    note += '*AI-curated summary will appear here after Phase 5*\n\n';
+    note += '*Highlights will appear after the next successful curation.*\n\n';
   }
 
   note += '## Browsing Log\n\n';

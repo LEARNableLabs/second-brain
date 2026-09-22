@@ -10,6 +10,10 @@
 
 import { readMessage, writeMessage } from './protocol.js';
 import { createModuleLogger } from '@second-brain/shared/logger';
+import { ExportResponseSchema } from '@second-brain/shared/schemas';
+import { getDatabase, closeDatabase } from '../db/connection.js';
+import { migrate } from '../db/migrate.js';
+import { saveCaptures } from '../db/operations.js';
 
 const logger = createModuleLogger('messaging:host');
 
@@ -22,11 +26,26 @@ export interface PingMessage {
   action: 'ping';
 }
 
-export type NativeMessage = GetCapturesMessage | PingMessage;
+export type NativeMessage = GetCapturesMessage | PingMessage | { action: 'syncCaptures'; captures: Record<string, unknown[]>; exportedAt: number };
 
 export function handleMessage(msg: NativeMessage): any {
+  if (!msg || typeof msg !== 'object') return { error: 'Invalid message' };
   logger.info({ action: msg.action }, 'handling message');
   switch (msg.action) {
+    case 'syncCaptures': {
+      const parsed = ExportResponseSchema.safeParse(msg);
+      if (!parsed.success) return { error: 'Invalid captures payload' };
+      const entries = Object.values(parsed.data.captures).flat();
+      const db = getDatabase();
+      try {
+        migrate(db);
+        const result = saveCaptures(db, entries);
+        // Acknowledge only after the transaction commits. Keep responses small.
+        return { success: true, received: entries.length, ...result };
+      } finally {
+        closeDatabase(db);
+      }
+    }
     case 'getCaptures': {
       const capturesByDate = msg.captures || {};
       let totalCount = 0;
@@ -49,7 +68,7 @@ export async function runHost(): Promise<void> {
   logger.info('native messaging host starting');
   try {
     const msg = await readMessage();
-    logger.info({ action: msg.action }, 'received message');
+    logger.info({ action: msg?.action }, 'received message');
     const response = handleMessage(msg);
     writeMessage(response);
     logger.info('response sent');

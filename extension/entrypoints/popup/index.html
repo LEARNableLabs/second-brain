@@ -13,7 +13,7 @@
     <div class="toggle-container">
       <span class="toggle-label" id="toggleLabel">Pause capture</span>
       <label class="toggle-switch">
-        <input type="checkbox" id="pauseToggle">
+        <input type="checkbox" id="pauseToggle" aria-labelledby="toggleLabel">
         <span class="slider"></span>
       </label>
     </div>
@@ -52,10 +52,20 @@
       Skip this domain: loading...
     </button>
     <a class="link-edit" id="editLink" href="#">Edit skipped sites</a>
+    <form id="skipEditor" hidden>
+      <label for="skippedDomains">Skipped domains, one per line</label>
+      <textarea id="skippedDomains" rows="6" spellcheck="false" placeholder="example.com"></textarea>
+      <button class="btn-save" type="submit">Save skipped sites</button>
+      <p id="skipError" role="alert"></p>
+    </form>
+    <div class="sync-status">
+      <p id="syncStatus" role="status">Waiting to sync with the local app</p>
+      <button id="syncButton" class="link-edit" type="button">Sync now</button>
+    </div>
   </div>
 
   <!-- Toast Notification -->
-  <div class="toast" id="toast"></div>
+  <div class="toast" id="toast" role="status"></div>
 
   <script src="./main.ts" type="module"></script>
 </body>

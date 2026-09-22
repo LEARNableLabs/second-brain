@@ -32,27 +32,22 @@ describe('config/reader', () => {
       expect(config.outputDir).toBe(expectedPath);
     });
 
-    it('returns defaults when config.json contains invalid JSON', async () => {
+    it('rejects invalid JSON without falling back to another provider', async () => {
       fs.writeFileSync(CONFIG_FILE, 'not valid json {{{');
 
-      const config = await loadConfig();
-      expect(config).toEqual({});
+      await expect(loadConfig()).rejects.toThrow('Invalid configuration');
     });
 
-    it('returns defaults when config.json contains relative outputDir', async () => {
+    it('rejects a relative outputDir', async () => {
       fs.writeFileSync(CONFIG_FILE, JSON.stringify({ outputDir: 'relative/path' }));
 
-      const config = await loadConfig();
-      // Schema validation should fail, fall back to defaults
-      expect(config).toEqual({});
+      await expect(loadConfig()).rejects.toThrow('Invalid configuration');
     });
 
-    it('returns defaults when config.json contains outputDir with .. traversal', async () => {
+    it('rejects outputDir traversal', async () => {
       fs.writeFileSync(CONFIG_FILE, JSON.stringify({ outputDir: '/Users/../etc/passwd' }));
 
-      const config = await loadConfig();
-      // Schema validation should fail, fall back to defaults
-      expect(config).toEqual({});
+      await expect(loadConfig()).rejects.toThrow('Invalid configuration');
     });
   });
 

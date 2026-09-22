@@ -47,7 +47,7 @@ function createClaudeCodeProvider(config: LLMConfig): LLMProvider {
       const { promisify } = await import('util');
       const execFileAsync = promisify(execFile);
 
-      const args = ['-p', prompt, '--output-format', 'text'];
+      const args = ['-p', prompt, '--output-format', 'text', '--tools', ''];
       if (config.model) {
         args.push('--model', config.model);
       }

@@ -7,6 +7,7 @@ import { createModuleLogger } from '@second-brain/shared/logger';
 const logger = createModuleLogger('config:reader');
 
 export const ConfigSchema = z.object({
+  email: z.object({ to: z.email() }).optional(),
   outputDir: z.string()
     .refine(p => path.isAbsolute(p), { message: 'outputDir must be an absolute path' })
     .refine(p => !p.includes('..'), { message: 'outputDir must not contain ..' })
@@ -33,12 +34,11 @@ export async function loadConfig(): Promise<Config> {
     logger.info('config loaded successfully');
     return validated;
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      logger.error({ err: error }, 'config validation failed');
-    } else {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       logger.info('no config file found, using defaults');
+      return {};
     }
-    return {};
+    throw new Error(`Invalid configuration at ${configPath}: ${(error as Error).message}`);
   }
 }
 

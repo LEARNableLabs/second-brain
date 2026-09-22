@@ -6,7 +6,7 @@ export default defineConfig({
     name: 'Second Brain Capture',
     version: '1.0.0',
     description: 'Passively captures browsing activity for your Obsidian vault',
-    permissions: ['tabs', 'history', 'webNavigation', 'storage', 'nativeMessaging', 'contextMenus'],
+    permissions: ['tabs', 'history', 'webNavigation', 'storage', 'nativeMessaging', 'contextMenus', 'alarms'],
     host_permissions: [],
     action: {
       default_popup: 'popup/index.html',

@@ -3,6 +3,7 @@ import { migrate } from '../db/migrate.js';
 import { searchCaptures, type CaptureSearchResult } from '../db/search-operations.js';
 import { searchNotes, type NoteSearchResult } from '../search/note-search.js';
 import { loadConfig, getOutputDir } from '../config/reader.js';
+import { parseDate } from '../config/date.js';
 
 interface SearchOptions {
   from?: string;
@@ -48,7 +49,13 @@ function formatNoteResults(results: NoteSearchResult[]): string {
 }
 
 export async function searchCommand(query: string, options: SearchOptions = {}): Promise<void> {
-  const limit = parseInt(options.limit || '20', 10);
+  const limit = Number(options.limit || '20');
+  if (!Number.isInteger(limit) || limit < 1) throw new Error('--limit must be a positive integer');
+  if (!query.trim()) throw new Error('Search query must not be empty');
+  if (options.notesOnly && options.dbOnly) throw new Error('Choose either --notes-only or --db-only');
+  if (options.from) parseDate(options.from);
+  if (options.to) parseDate(options.to);
+  if (options.from && options.to && options.from > options.to) throw new Error('--from must be on or before --to');
   console.error(`Searching for "${query}"...`);
 
   let captureResults: CaptureSearchResult[] = [];

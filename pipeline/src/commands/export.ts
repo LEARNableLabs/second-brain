@@ -14,10 +14,7 @@ interface ExportOptions {
 }
 
 /**
- * Export command: fetch captures from extension via native messaging, validate, save to SQLite.
- * Per D-01: CLI sends request to extension via native messaging host.
- * Per D-02: Export is CLI-pull on demand.
- * Per D-09: Output is summary stats.
+ * Import a legacy capture snapshot. Current extensions sync directly to SQLite.
  */
 export async function exportCommand(options: ExportOptions = {}): Promise<void> {
   const requestId = crypto.randomUUID();
@@ -33,8 +30,7 @@ export async function exportCommand(options: ExportOptions = {}): Promise<void> 
       console.error(`Applied ${applied} migration(s). Schema now at v${current}.`);
     }
 
-    // Fetch captures from extension via native messaging
-    // The CLI spawns the native host process, which communicates with the extension
+    // Read an optional legacy snapshot.
     const captures = await fetchCapturesFromExtension();
 
     if (!captures || Object.keys(captures).length === 0) {
@@ -78,8 +74,6 @@ export async function exportCommand(options: ExportOptions = {}): Promise<void> 
     if (manualCount > 0) {
       console.log(`  ⭐ ${manualCount} manual saves`);
     }
-    // Detect source browsers from capture domains (simplified: always show Chrome + Comet for now)
-    console.log(`  Source: Chrome + Comet`);
     console.log(`  Database: ${getDatabasePath()}`);
     console.log(`  Schema: v${getSchemaVersion(db)}`);
 
@@ -94,14 +88,7 @@ export async function exportCommand(options: ExportOptions = {}): Promise<void> 
 }
 
 /**
- * Fetch captures from the browser extension.
- *
- * The CLI reads captures from ~/.second-brain/export.json, which is written by the
- * native messaging host when the extension sends captures. The extension initiates
- * the native messaging flow (it calls sendNativeMessage), and the host writes the
- * result to the export file for the CLI to consume.
- *
- * Flow: Extension -> sendNativeMessage -> Native Host -> writes export.json -> CLI reads it
+ * Read a legacy export.json without deleting the retryable source snapshot.
  */
 async function fetchCapturesFromExtension(): Promise<Record<string, CaptureEntry[]>> {
   const exportPath = path.join(
@@ -110,13 +97,8 @@ async function fetchCapturesFromExtension(): Promise<Record<string, CaptureEntry
   );
 
   if (!fs.existsSync(exportPath)) {
-    console.error('No export file found. Ensure the browser extension has exported data.');
-    console.error(`Expected: ${exportPath}`);
-    console.error('');
-    console.error('To export manually:');
-    console.error('  1. Open Chrome with the Second Brain extension installed');
-    console.error('  2. The extension will write captures to the export file via native messaging');
-    console.error('  3. Run this command again');
+    console.error('No export file found. Current extensions sync directly to the database.');
+    console.error('Open the extension popup and select Sync now to verify the connection.');
     return {};
   }
 
@@ -126,15 +108,15 @@ async function fetchCapturesFromExtension(): Promise<Record<string, CaptureEntry
 
     // Validate overall structure
     if (data.captures && typeof data.captures === 'object') {
-      // Remove export file after reading (one-time consumption)
-      fs.unlinkSync(exportPath);
+      // Keep the snapshot for retries and dry runs. Database imports are idempotent.
+      if (Array.isArray(data.captures) || Object.values(data.captures).some(entries => !Array.isArray(entries))) {
+        throw new Error('Each capture date must contain an array');
+      }
       return data.captures;
     }
 
-    console.error('Export file has unexpected structure. Expected { captures: { ... } }');
-    return {};
+    throw new Error('Export file has unexpected structure. Expected { captures: { ... } }');
   } catch (err) {
-    console.error(`Failed to read export file: ${err}`);
-    return {};
+    throw new Error(`Failed to read export file: ${err}`);
   }
 }
